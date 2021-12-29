@@ -14,6 +14,7 @@
 #include "Vulkan\SwapChain.h"
 #include "Vulkan\RenderPass.h"
 #include "Vulkan\GraphicsPipeline.h"
+#include "Model.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -37,6 +38,7 @@ namespace ash
 
 		Window* m_window{};
 
+
 		std::unique_ptr<Instance> m_instance{};
 		std::unique_ptr<DebugMessenger> m_debugMessenger{};
 		std::unique_ptr<Surface> m_surface{};
@@ -45,6 +47,7 @@ namespace ash
 		std::unique_ptr<SwapChain> m_swapChain{};
 		std::unique_ptr<RenderPass> m_renderPass{};
 		std::unique_ptr<GraphicsPipeline> m_graphicsPipeline{};
+		std::unique_ptr<Model> m_model{};
 		
 		std::vector<VkCommandBuffer> m_commandBuffers{};
 
@@ -72,6 +75,8 @@ namespace ash
 		void cleanupCommandBuffers();
 
 		void cleanupSyncObjects();
+
+		void createModel();
 
 	};
 }

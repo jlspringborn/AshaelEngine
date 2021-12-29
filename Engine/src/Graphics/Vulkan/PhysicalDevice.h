@@ -64,6 +64,8 @@ namespace ash
 
 		const SwapChainSupportDetails getSwapChainSupportDetails() const { return querySwapChainSupport(m_physicalDevice, *m_surface); }
 
+		const uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
+
 	private:
 
 		const Surface* m_surface{};

@@ -26,6 +26,7 @@ namespace ash
 
 	private:
 
+
 		std::unique_ptr<Window> m_window{};
 		std::unique_ptr<Input> m_input{};
 		std::unique_ptr<Graphics> m_graphics{};

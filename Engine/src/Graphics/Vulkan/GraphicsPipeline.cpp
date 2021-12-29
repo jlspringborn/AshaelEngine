@@ -1,5 +1,7 @@
 #include "Vulkan/GraphicsPipeline.h"
 
+#include <Model.h>
+
 #include <fstream>
 #include <stdexcept>
 
@@ -49,13 +51,16 @@ namespace ash
 		// info for all shader stages
 		VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
+		auto bindingDescription = Vertex::getBindingDescription();
+		auto attributeDescriptions = Vertex::getAttributeDescriptions();
+
 		// info for how vertex data is loaded into the vertex shader
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
-		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.pVertexBindingDescriptions = nullptr;
-		vertexInputInfo.vertexAttributeDescriptionCount = 0;
-		vertexInputInfo.pVertexAttributeDescriptions = nullptr;
+		vertexInputInfo.sType							= VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+		vertexInputInfo.vertexBindingDescriptionCount	= 1;
+		vertexInputInfo.pVertexBindingDescriptions		= &bindingDescription;
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+		vertexInputInfo.pVertexAttributeDescriptions	= attributeDescriptions.data();
 
 		// info on what kind of geometry will be drawn, IE: triangles, lines, etc...
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};

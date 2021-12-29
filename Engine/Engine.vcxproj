@@ -20,7 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\GameObjects\GameObject.h" />
     <ClInclude Include="src\Graphics\Graphics.h" />
+    <ClInclude Include="src\Graphics\Model.h" />
     <ClInclude Include="src\Graphics\Vulkan\DebugMessenger.h" />
     <ClInclude Include="src\Graphics\Vulkan\GraphicsPipeline.h" />
     <ClInclude Include="src\Graphics\Vulkan\Instance.h" />
@@ -34,7 +36,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\GameObjects\GameObject.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
+    <ClCompile Include="src\Graphics\Model.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\DebugMessenger.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\GraphicsPipeline.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Instance.cpp" />

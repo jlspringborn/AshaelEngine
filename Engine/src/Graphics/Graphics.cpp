@@ -30,6 +30,9 @@ namespace ash
 
 		createCommandBuffers();
 		createSyncObjects();
+
+		m_model = std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get());
+
 		//////////////////////////////////////////////////////////////////////////
 		// TODO: move command buffer recording to renderGameObjects and record
 		// every frame instead
@@ -47,6 +50,7 @@ namespace ash
 			}
 
 			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
+			m_model->draw(m_commandBuffers[i]);
 			endRenderPass(m_commandBuffers[i]);
 		}
 		//////////////////////////////////////////////////////////////////////////
@@ -193,9 +197,8 @@ namespace ash
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
+		// TODO: move this to the model class later
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, *m_graphicsPipeline);
-
-		vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 	}
 
 	void Graphics::endRenderPass(VkCommandBuffer commandBuffer)
@@ -247,6 +250,7 @@ namespace ash
 			}
 
 			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
+			m_model->draw(m_commandBuffers[i]);
 			endRenderPass(m_commandBuffers[i]);
 		}
 		//////////////////////////////////////////////////////////////////////////
