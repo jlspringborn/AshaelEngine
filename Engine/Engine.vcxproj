@@ -23,6 +23,7 @@
     <ClInclude Include="src\GameObjects\GameObject.h" />
     <ClInclude Include="src\Graphics\Graphics.h" />
     <ClInclude Include="src\Graphics\Model.h" />
+    <ClInclude Include="src\Graphics\Vulkan\Buffer.h" />
     <ClInclude Include="src\Graphics\Vulkan\DebugMessenger.h" />
     <ClInclude Include="src\Graphics\Vulkan\DescriptorPool.h" />
     <ClInclude Include="src\Graphics\Vulkan\GraphicsPipeline.h" />
@@ -40,6 +41,7 @@
     <ClCompile Include="src\GameObjects\GameObject.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\Model.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Buffer.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\DebugMessenger.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\DescriptorPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\GraphicsPipeline.cpp" />

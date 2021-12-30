@@ -2,9 +2,11 @@
 
 #include "Vulkan/PhysicalDevice.h"
 #include "Vulkan/LogicalDevice.h"
+#include "Vulkan/Buffer.h"
 
 
 #define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <vulkan/vulkan.h>
@@ -70,11 +72,6 @@ namespace ash
 
 		void cleanupUniformBuffers();
 
-		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
-			VkBuffer& buffer, VkDeviceMemory& bufferMemory, const PhysicalDevice* physicalDevice);
-
-		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
-
 		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
 
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool);
@@ -96,14 +93,11 @@ namespace ash
 			0, 1, 2, 2, 3, 0
 		};
 
-		VkBuffer vertexBuffer{};
-		VkDeviceMemory vertexBufferMemory{};
+		std::unique_ptr<Buffer> m_vertexBuffer;
+		std::unique_ptr<Buffer> m_indexBuffer;
 
-		VkBuffer indexBuffer{};
-		VkDeviceMemory indexBufferMemory{};
+		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 
-		std::vector<VkBuffer> uniformBuffers{};
-		std::vector<VkDeviceMemory> uniformBuffersMemory{};
 
 		std::vector<VkDescriptorSet> descriptorSets{};
 
