@@ -13,7 +13,7 @@ namespace ash
 	class GraphicsPipeline
 	{
 	public:
-		GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass);
+		GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout);
 		~GraphicsPipeline();
 
 		/**
@@ -23,7 +23,9 @@ namespace ash
 
 		void cleanupPipeline();
 
-		void createPipeline(const SwapChain* swapChain, const RenderPass* renderPass);
+		void createPipeline(const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout);
+
+		const VkPipelineLayout& getLayout() const { return m_pipelineLayout; }
 
 	private:
 

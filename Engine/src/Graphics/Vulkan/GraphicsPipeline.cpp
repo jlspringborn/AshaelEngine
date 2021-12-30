@@ -7,10 +7,10 @@
 
 namespace ash
 {
-	GraphicsPipeline::GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass) :
+	GraphicsPipeline::GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout) :
 		m_logicalDevice{ logicalDevice }
 	{
-		createPipeline(swapChain, renderPass);
+		createPipeline(swapChain, renderPass, layout);
 	}
 
 	GraphicsPipeline::~GraphicsPipeline()
@@ -24,7 +24,7 @@ namespace ash
 		vkDestroyPipelineLayout(*m_logicalDevice, m_pipelineLayout, nullptr);
 	}
 
-	void GraphicsPipeline::createPipeline(const SwapChain* swapChain, const RenderPass* renderPass)
+	void GraphicsPipeline::createPipeline(const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout)
 	{
 		// get shader code from files
 		auto vertShaderCode = readFile("shaders/vert.spv");
@@ -101,7 +101,7 @@ namespace ash
 		rasterizer.rasterizerDiscardEnable = VK_FALSE;
 		rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
 		rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
-		rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+		rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
 		rasterizer.depthBiasEnable = VK_FALSE;
 
 		// multisampling info
@@ -132,7 +132,8 @@ namespace ash
 		// pipeline layout
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
+		pipelineLayoutInfo.setLayoutCount = 1;
+		pipelineLayoutInfo.pSetLayouts = &layout;
 		pipelineLayoutInfo.pushConstantRangeCount = 0;
 
 		if (vkCreatePipelineLayout(*m_logicalDevice, &pipelineLayoutInfo, nullptr, &m_pipelineLayout) != VK_SUCCESS)

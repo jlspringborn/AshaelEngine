@@ -22,16 +22,19 @@ namespace ash
 		m_physicalDevice	= std::make_unique<PhysicalDevice>(m_instance.get(), m_surface.get());
 		m_logicalDevice		= std::make_unique<LogicalDevice>(m_instance.get(), m_physicalDevice.get());
 		m_swapChain			= std::make_unique<SwapChain>(m_window, m_surface.get(), m_physicalDevice.get(), m_logicalDevice.get());
+		m_descriptorPool	= std::make_unique<DescriptorPool>(m_logicalDevice.get(), m_swapChain->getImageCount());
+		createDescriptorSetLayout();
+		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(), m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool);
 		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get());
-		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get());
-		
+		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
+
 		// must be called after render pass creation
 		m_swapChain->createFramebuffers(*m_renderPass);
+
 
 		createCommandBuffers();
 		createSyncObjects();
 
-		m_model = std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get());
 
 		//////////////////////////////////////////////////////////////////////////
 		// TODO: move command buffer recording to renderGameObjects and record
@@ -50,7 +53,7 @@ namespace ash
 			}
 
 			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
-			m_model->draw(m_commandBuffers[i]);
+			m_model->draw(m_commandBuffers[i], m_graphicsPipeline->getLayout(), i);
 			endRenderPass(m_commandBuffers[i]);
 		}
 		//////////////////////////////////////////////////////////////////////////
@@ -60,6 +63,7 @@ namespace ash
 	{
 		cleanupSyncObjects();
 		cleanupCommandBuffers();
+		cleanupDescriptorSetLayout();
 	}
 
 	void Graphics::renderGameObjects()
@@ -91,6 +95,8 @@ namespace ash
 		VkSemaphore waitSemaphores[]		= { m_imageAvailableSemaphores[m_currentFrame] };
 		VkPipelineStageFlags waitStages[]	= { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[]		= { m_renderFinishedSemaphores[m_currentFrame] };
+
+		updateUniformBuffers(imageIndex);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType				= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -229,9 +235,12 @@ namespace ash
 		m_swapChain			->createSwapChain(m_window, m_surface.get(), m_physicalDevice.get());
 		m_swapChain			->createImageViews();
 		m_renderPass		->createRenderPass(m_swapChain.get());
-		m_graphicsPipeline	->createPipeline(m_swapChain.get(), m_renderPass.get());
+		m_graphicsPipeline	->createPipeline(m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
 		m_swapChain			->createFramebuffers(*m_renderPass);
 
+		m_model->createUniformBuffers(m_physicalDevice.get(), m_swapChain->getImageCount());
+		m_descriptorPool->createDescriptorPool(m_swapChain->getImageCount());
+		m_model->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool);
 		createCommandBuffers();
 
 		//////////////////////////////////////////////////////////////////////////
@@ -250,7 +259,7 @@ namespace ash
 			}
 
 			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
-			m_model->draw(m_commandBuffers[i]);
+			m_model->draw(m_commandBuffers[i], m_graphicsPipeline->getLayout(), i);
 			endRenderPass(m_commandBuffers[i]);
 		}
 		//////////////////////////////////////////////////////////////////////////
@@ -272,6 +281,36 @@ namespace ash
 		}
 	}
 
+	void Graphics::updateUniformBuffers(uint32_t currentImage)
+	{
+		m_model->updateUniformBuffer(currentImage, m_swapChain->getSwapExtent());
+	}
+
+	void Graphics::createDescriptorSetLayout()
+	{
+		VkDescriptorSetLayoutBinding uboLayoutBinding{};
+		uboLayoutBinding.binding = 0;
+		uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+		uboLayoutBinding.descriptorCount = 1;
+		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+		uboLayoutBinding.pImmutableSamplers = nullptr;
+
+		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		layoutInfo.bindingCount = 1;
+		layoutInfo.pBindings = &uboLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(*m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor set layout!");
+		}
+	}
+
+	void Graphics::cleanupDescriptorSetLayout()
+	{
+		vkDestroyDescriptorSetLayout(*m_logicalDevice, m_descriptorSetLayout, nullptr);
+	}
+
 	void Graphics::cleanupSwapChain()
 	{
 		cleanupCommandBuffers();
@@ -280,5 +319,7 @@ namespace ash
 		m_renderPass		->cleanupRenderPass();
 		m_swapChain			->cleanupImageViews();
 		m_swapChain			->cleanupSwapChain();
+		m_model				->cleanupUniformBuffers();
+		m_descriptorPool	->cleanupDescriptorPool();
 	}
 }

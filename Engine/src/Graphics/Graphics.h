@@ -14,6 +14,7 @@
 #include "Vulkan\SwapChain.h"
 #include "Vulkan\RenderPass.h"
 #include "Vulkan\GraphicsPipeline.h"
+#include "Vulkan\DescriptorPool.h"
 #include "Model.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -47,6 +48,7 @@ namespace ash
 		std::unique_ptr<SwapChain> m_swapChain{};
 		std::unique_ptr<RenderPass> m_renderPass{};
 		std::unique_ptr<GraphicsPipeline> m_graphicsPipeline{};
+		std::unique_ptr<DescriptorPool> m_descriptorPool{};
 		std::unique_ptr<Model> m_model{};
 		
 		std::vector<VkCommandBuffer> m_commandBuffers{};
@@ -59,6 +61,8 @@ namespace ash
 		const int m_maxFramesInFlight{ 2 };
 
 		size_t m_currentFrame = 0;
+
+		VkDescriptorSetLayout m_descriptorSetLayout{};
 
 		void createCommandBuffers();
 
@@ -76,7 +80,11 @@ namespace ash
 
 		void cleanupSyncObjects();
 
-		void createModel();
+		void updateUniformBuffers(uint32_t currentImage);
+
+		void createDescriptorSetLayout();
+
+		void cleanupDescriptorSetLayout();
 
 	};
 }
