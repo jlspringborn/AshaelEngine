@@ -1,5 +1,5 @@
 /**
- * Manages app graphical interface
+ * Manages the apps graphical interface
  *
  * Copyright (C) 2021, Jesse Springborn
  */

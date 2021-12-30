@@ -1,3 +1,8 @@
+/**
+ * Drawable 3D object
+ *
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #pragma once
 
 #include "Vulkan/PhysicalDevice.h"
@@ -17,6 +22,7 @@
 
 namespace ash
 {
+	// TODO: Move this to another script
 	struct Vertex
 	{
 		glm::vec2 pos;
@@ -48,6 +54,7 @@ namespace ash
 		}
 	};
 
+	// TODO: Move this to another script
 	struct UniformBufferObject
 	{
 		glm::mat4 model;
@@ -62,24 +69,52 @@ namespace ash
 			const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool);
 		~Model();
 
+		/**
+		 * Binds buffers and descriptor set, then calls draw command
+		 */
 		void draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index);
 
+		/**
+		 * Creates buffer to hold vertices
+		 */
 		void createVertexBuffer(const PhysicalDevice* physicalDevice);
 
+		/**
+		 * Creates buffer to hold indices of vertices
+		 */
 		void createIndexBuffer(const PhysicalDevice* physicalDevice);
 
+		/**
+		 * Creates a uniform buffer for each swap chain frame to allow for
+		 * matrix transformations during shading
+		 */
 		void createUniformBuffers(const PhysicalDevice* physicalDevice, const int swapChainImageCount);
 
+		/**
+		 * Deletes all uniform buffers, called during swap chain recreation
+		 */
 		void cleanupUniformBuffers();
 
+		/**
+		 * Updates uniform buffers with new transform data
+		 */
 		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
 
+		/**
+		 * Creates a descriptor set for each swap chain image
+		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool);
 
 	private:
 
+		/**
+		 * Vulkan Logical Device, used for resource destruction
+		 */
 		const LogicalDevice* m_logicalDevice{};
 
+		/**
+		 * TEMP: holds vertex data
+		 */
 		const std::vector<Vertex> vertices =
 		{
 			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -88,17 +123,32 @@ namespace ash
 			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
 		};
 
+		/**
+		 * TEMP: holds index data
+		 */
 		const std::vector<uint16_t> indices =
 		{
 			0, 1, 2, 2, 3, 0
 		};
 
+		/**
+		 * Buffer to hold vertex data
+		 */
 		std::unique_ptr<Buffer> m_vertexBuffer;
+		
+		/**
+		 * Buffer to hold index of vertices
+		 */
 		std::unique_ptr<Buffer> m_indexBuffer;
 
+		/**
+		 * Array of Uniform buffers, one for each swap chain image
+		 */
 		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 
-
+		/**
+		 * Array of Descriptor Sets, one for each Uniform Buffer
+		 */
 		std::vector<VkDescriptorSet> descriptorSets{};
 
 	};

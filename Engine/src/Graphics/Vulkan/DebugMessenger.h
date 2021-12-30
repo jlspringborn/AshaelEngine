@@ -1,5 +1,5 @@
 /**
-* manages vulkan debug messages
+* Wrapper for Vulkan debug messages
 * 
 * Copyright (C) 2021, Jesse Springborn
 */
@@ -12,6 +12,9 @@
 
 namespace ash
 {
+	/**
+	 * Manages Vulkan debug messages
+	 */
 	class DebugMessenger
 	{
 	public:
@@ -19,14 +22,28 @@ namespace ash
 
 		~DebugMessenger();
 
-		VkDebugUtilsMessengerEXT getDebugMessenger() const { return m_debugMessenger; }
+		/**
+		 * overide * operator for more intuitive access
+		 */
+		operator const VkDebugUtilsMessengerEXT& () const { return m_debugMessenger; }
 
+		/**
+		 * Fills in data for debug messenger create info, called during creation
+		 * and during instance creation before the messenger has been created
+		 */
 		static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 
 	private:
-		VkDebugUtilsMessengerEXT m_debugMessenger{};
 
+		/**
+		 * Vulkan Instance, used during destruction
+		 */
 		const Instance* m_instance{};
+
+		/**
+		 * Vulkan Debug Messenger
+		 */
+		VkDebugUtilsMessengerEXT m_debugMessenger{};
 
 		/**
 		 * prints vulkan debug messages to console

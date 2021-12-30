@@ -1,5 +1,5 @@
 /**
- * @brief
+ * Initializes components and manages core loop
  *
  * Copyright (C) 2021, Jesse Springborn
  */
