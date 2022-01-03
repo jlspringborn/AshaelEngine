@@ -26,12 +26,15 @@ namespace ash
 			queueCreateInfos.push_back(queueCreateInfo);
 		}
 
+		VkPhysicalDeviceFeatures deviceFeatures{};
+		deviceFeatures.samplerAnisotropy = VK_TRUE;
+
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType					= VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.pQueueCreateInfos		= queueCreateInfos.data();
 		createInfo.queueCreateInfoCount		= static_cast<uint32_t>(queueCreateInfos.size());
-		createInfo.pEnabledFeatures			= &(physicalDevice->getDeviceFeatures());
+		createInfo.pQueueCreateInfos		= queueCreateInfos.data();
+		createInfo.pEnabledFeatures			= &deviceFeatures;
 		createInfo.enabledExtensionCount	= static_cast<uint32_t>(physicalDevice->getDeviceExtensions().size());
 		createInfo.ppEnabledExtensionNames	= physicalDevice->getDeviceExtensions().data();
 
@@ -59,6 +62,41 @@ namespace ash
 	{
 		vkDestroyCommandPool(m_device, m_commandPool, nullptr);
 		vkDestroyDevice(m_device, nullptr);
+	}
+
+	const VkCommandBuffer LogicalDevice::beginSingleTimeCommand() const
+	{
+		VkCommandBufferAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocInfo.commandPool = m_commandPool;
+		allocInfo.commandBufferCount = 1;
+
+		VkCommandBuffer commandBuffer;
+		vkAllocateCommandBuffers(m_device, &allocInfo, &commandBuffer);
+
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+		return commandBuffer;
+	}
+
+	const void LogicalDevice::endSingleTimeCommand(VkCommandBuffer commandBuffer) const
+	{
+		vkEndCommandBuffer(commandBuffer);
+
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandBuffer;
+
+		vkQueueSubmit(m_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+		vkQueueWaitIdle(m_graphicsQueue);
+
+		vkFreeCommandBuffers(m_device, m_commandPool, 1, &commandBuffer);
 	}
 
 	void LogicalDevice::createCommandPool(const PhysicalDevice* physicalDevice)

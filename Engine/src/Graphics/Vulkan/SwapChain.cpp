@@ -122,12 +122,14 @@ namespace ash
 		m_swapExtent = extent;
 	}
 
+	
 	void SwapChain::createImageViews()
 	{
 		m_imageViews.resize(m_images.size());
 
 		for (size_t i{ 0 }; i < m_images.size(); ++i)
 		{
+			// TODO: abstract to another function since it's used by textures as well
 			VkImageViewCreateInfo createInfo{};
 			createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 			createInfo.image = m_images[i];

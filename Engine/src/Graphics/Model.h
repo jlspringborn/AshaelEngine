@@ -105,6 +105,17 @@ namespace ash
 		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool);
 
+		void createTextureImage(const PhysicalDevice* physicalDevice);
+
+		void createTexteImageView();
+
+		void createImage(const PhysicalDevice* physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, 
+			VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+
+		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
 	private:
 
 		/**
@@ -150,6 +161,12 @@ namespace ash
 		 * Array of Descriptor Sets, one for each Uniform Buffer
 		 */
 		std::vector<VkDescriptorSet> descriptorSets{};
+
+		VkImage m_textureImage{};
+
+		VkDeviceMemory m_textureImageMemory{};
+
+		VkImageView m_textureImageView{};
 
 	};
 }

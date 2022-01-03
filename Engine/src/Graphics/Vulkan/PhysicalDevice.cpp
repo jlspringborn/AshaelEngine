@@ -75,7 +75,10 @@ namespace ash
 			bSwapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
 		}
 
-		return indices.isComplete() && bExtensionsSupported && bSwapChainAdequate;
+		VkPhysicalDeviceFeatures supportedFeatures;
+		vkGetPhysicalDeviceFeatures(device, &supportedFeatures);
+
+		return indices.isComplete() && bExtensionsSupported && bSwapChainAdequate && supportedFeatures.samplerAnisotropy;
 	}
 
 	PhysicalDevice::QueueFamilyIndices PhysicalDevice::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)

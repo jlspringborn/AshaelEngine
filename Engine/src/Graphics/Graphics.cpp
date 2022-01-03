@@ -24,6 +24,7 @@ namespace ash
 		m_swapChain			= std::make_unique<SwapChain>(m_window, m_surface.get(), m_physicalDevice.get(), m_logicalDevice.get());
 		m_descriptorPool	= std::make_unique<DescriptorPool>(m_logicalDevice.get(), m_swapChain->getImageCount());
 		createDescriptorSetLayout();
+		createTextureSampler();
 		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(), m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool);
 		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get());
 		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
@@ -64,6 +65,7 @@ namespace ash
 		cleanupSyncObjects();
 		cleanupCommandBuffers();
 		cleanupDescriptorSetLayout();
+		cleanupTextureSampler();
 	}
 
 	void Graphics::renderGameObjects()
@@ -309,6 +311,37 @@ namespace ash
 	void Graphics::cleanupDescriptorSetLayout()
 	{
 		vkDestroyDescriptorSetLayout(*m_logicalDevice, m_descriptorSetLayout, nullptr);
+	}
+
+	void Graphics::createTextureSampler()
+	{
+		VkSamplerCreateInfo samplerInfo{};
+		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+		samplerInfo.magFilter = VK_FILTER_LINEAR;	// over sampling
+		samplerInfo.minFilter = VK_FILTER_LINEAR;	// under sampling
+		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;;
+		samplerInfo.anisotropyEnable = VK_TRUE;
+		samplerInfo.maxAnisotropy = m_physicalDevice->getProperties().limits.maxSamplerAnisotropy;
+		samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		samplerInfo.unnormalizedCoordinates = VK_FALSE;
+		samplerInfo.compareEnable = VK_FALSE;
+		samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+		samplerInfo.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		samplerInfo.mipLodBias = 0.0f;
+		samplerInfo.minLod = 0.0f;
+		samplerInfo.maxLod = 0.0f;
+
+		if (vkCreateSampler(*m_logicalDevice, &samplerInfo, nullptr, &m_textureSampler) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create texture sampler!");
+		}
+	}
+
+	void Graphics::cleanupTextureSampler()
+	{
+		vkDestroySampler(*m_logicalDevice, m_textureSampler, nullptr);
 	}
 
 	void Graphics::cleanupSwapChain()

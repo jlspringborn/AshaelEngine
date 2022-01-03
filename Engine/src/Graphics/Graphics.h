@@ -64,6 +64,8 @@ namespace ash
 
 		VkDescriptorSetLayout m_descriptorSetLayout{};
 
+		VkSampler m_textureSampler{};
+
 		void createCommandBuffers();
 
 		void createSyncObjects();
@@ -85,6 +87,10 @@ namespace ash
 		void createDescriptorSetLayout();
 
 		void cleanupDescriptorSetLayout();
+
+		void createTextureSampler();
+
+		void cleanupTextureSampler();
 
 	};
 }

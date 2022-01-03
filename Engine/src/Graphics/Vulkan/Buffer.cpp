@@ -42,20 +42,7 @@ namespace ash
 
 	void Buffer::copyBuffer(const Buffer* srcBuffer, VkDeviceSize size)
 	{
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = m_logicalDevice->getCommandPool();
-		allocInfo.commandBufferCount = 1;
-
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(*m_logicalDevice, &allocInfo, &commandBuffer);
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		VkCommandBuffer commandBuffer = m_logicalDevice->beginSingleTimeCommand();
 
 		VkBufferCopy copyRegion{};
 		copyRegion.srcOffset = 0;
@@ -63,14 +50,7 @@ namespace ash
 		copyRegion.size = size;
 
 		vkCmdCopyBuffer(commandBuffer, *srcBuffer, m_buffer, 1, &copyRegion);
-		vkEndCommandBuffer(commandBuffer);
-
-		VkSubmitInfo submitInfo{};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-		vkQueueSubmit(m_logicalDevice->getGraphicQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(m_logicalDevice->getGraphicQueue());
-		vkFreeCommandBuffers(*m_logicalDevice, m_logicalDevice->getCommandPool(), 1, &commandBuffer);
+		
+		m_logicalDevice->endSingleTimeCommand(commandBuffer);
 	}
 }

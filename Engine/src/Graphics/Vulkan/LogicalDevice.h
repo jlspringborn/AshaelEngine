@@ -50,6 +50,11 @@ namespace ash
 		 */
 		const VkCommandPool& getCommandPool() const { return m_commandPool; }
 
+		const VkCommandBuffer beginSingleTimeCommand() const;
+
+		const void endSingleTimeCommand(VkCommandBuffer commandBuffer) const;
+
+
 	private:
 		
 		/**
