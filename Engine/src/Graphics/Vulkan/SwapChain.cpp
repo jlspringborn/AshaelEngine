@@ -2,6 +2,7 @@
 
 #include <cstdint>	// for UINT32_MAX
 #include <algorithm>	// for std::clamp
+#include <array>
 #include <stdexcept>
 
 namespace ash
@@ -152,22 +153,26 @@ namespace ash
 		}
 	}
 
-	void SwapChain::createFramebuffers(VkRenderPass renderPass)
+	void SwapChain::createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView)
 	{
 		m_framebuffers.resize(m_imageViews.size());
 
 		for (size_t i = 0; i < m_imageViews.size(); i++)
 		{
-			VkImageView attachments[] = { m_imageViews[i] };
+			std::array<VkImageView, 2> attachments =
+			{
+				m_imageViews[i],
+				depthImageView
+			};
 
 			VkFramebufferCreateInfo framebufferInfo{};
-			framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-			framebufferInfo.renderPass = renderPass;
-			framebufferInfo.attachmentCount = 1;
-			framebufferInfo.pAttachments = attachments;
-			framebufferInfo.width = m_swapExtent.width;
-			framebufferInfo.height = m_swapExtent.height;
-			framebufferInfo.layers = 1;
+			framebufferInfo.sType			= VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			framebufferInfo.renderPass		= renderPass;
+			framebufferInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+			framebufferInfo.pAttachments	= attachments.data();
+			framebufferInfo.width			= m_swapExtent.width;
+			framebufferInfo.height			= m_swapExtent.height;
+			framebufferInfo.layers			= 1;
 
 			if (vkCreateFramebuffer(*m_logicalDevice, &framebufferInfo, nullptr, &m_framebuffers[i]) != VK_SUCCESS)
 			{

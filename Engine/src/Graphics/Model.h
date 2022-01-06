@@ -80,7 +80,7 @@ namespace ash
 	public:
 		Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice,
 			const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-			VkSampler sampler, VkExtent2D extent);
+			VkSampler sampler);
 		~Model();
 
 		/**
@@ -115,17 +115,15 @@ namespace ash
 		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
 
 		/**
+		 * Creates texture image to display on geometry
+		 */
+		void createTexture(const PhysicalDevice* physicalDevice);
+
+		/**
 		 * Creates a descriptor set for each swap chain image
 		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler);
 
-		void createTexture(const PhysicalDevice* physicalDevice);
-
-		void createDepthResources(const PhysicalDevice* phyiscalDevice, VkExtent2D extent);
-
-		VkFormat findDepthFormat(const PhysicalDevice* phyiscalDevice);
-
-		bool hasStencilComponent(VkFormat format);
 
 	private:
 
@@ -180,9 +178,6 @@ namespace ash
 		std::vector<VkDescriptorSet> descriptorSets{};
 
 		std::unique_ptr<Image> m_texture{};
-
-		std::unique_ptr<Image> m_depthImage{};
-
 
 	};
 }

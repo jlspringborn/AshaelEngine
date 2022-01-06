@@ -30,7 +30,7 @@ namespace ash
 
 		const std::vector<VkFramebuffer>& getFramebuffers() const { return m_framebuffers; }
 
-		void createFramebuffers(VkRenderPass renderPass);
+		void createFramebuffers(VkRenderPass renderPass, VkImageView depthImageView);
 
 		void cleanupFramebuffers();
 

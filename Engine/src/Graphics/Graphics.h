@@ -15,6 +15,7 @@
 #include "Vulkan\RenderPass.h"
 #include "Vulkan\GraphicsPipeline.h"
 #include "Vulkan\DescriptorPool.h"
+#include "Vulkan\Image.h"
 #include "Model.h"
 
 #define GLFW_INCLUDE_VULKAN
@@ -49,7 +50,9 @@ namespace ash
 		std::unique_ptr<RenderPass> m_renderPass{};
 		std::unique_ptr<GraphicsPipeline> m_graphicsPipeline{};
 		std::unique_ptr<DescriptorPool> m_descriptorPool{};
+		std::unique_ptr<Image> m_depthImage{};
 		std::unique_ptr<Model> m_model{};
+
 		
 		std::vector<VkCommandBuffer> m_commandBuffers{};
 
@@ -91,6 +94,12 @@ namespace ash
 		void createTextureSampler();
 
 		void cleanupTextureSampler();
+
+		void createDepthResources();
+
+		void cleanupDepthResource();
+
+		bool hasStencilComponent(VkFormat format);
 
 	};
 }

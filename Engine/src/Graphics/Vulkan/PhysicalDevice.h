@@ -96,6 +96,8 @@ namespace ash
 		 */
 		const uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
+		const VkFormat findDepthFormat() const;
+
 		/**
 		 * Returns format supported by GPU, used for depth image creation
 		 */

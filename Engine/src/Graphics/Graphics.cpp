@@ -27,14 +27,16 @@ namespace ash
 		createDescriptorSetLayout();
 		createTextureSampler();
 
-		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(),
-			m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_swapChain->getSwapExtent());
 
-		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get());
+		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(),
+			m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
+
+		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get(), m_physicalDevice.get());
 		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
 
+		createDepthResources();
 		// must be called after render pass creation
-		m_swapChain->createFramebuffers(*m_renderPass);
+		m_swapChain->createFramebuffers(*m_renderPass, *m_depthImage);
 
 
 		createCommandBuffers();
@@ -196,7 +198,9 @@ namespace ash
 
 	void Graphics::startRenderPass(VkFramebuffer framebuffer, VkCommandBuffer commandBuffer)
 	{
-		VkClearValue clearColor	= { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+		std::array<VkClearValue, 2> clearValues{};
+		clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+		clearValues[1].color = { 1.0f, 0 };
 		
 		VkRenderPassBeginInfo renderPassInfo{};
 		renderPassInfo.sType				= VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -204,8 +208,8 @@ namespace ash
 		renderPassInfo.framebuffer			= framebuffer;
 		renderPassInfo.renderArea.offset	= { 0,0 };
 		renderPassInfo.renderArea.extent	= m_swapChain->getSwapExtent();
-		renderPassInfo.clearValueCount		= 1;
-		renderPassInfo.pClearValues			= &clearColor;
+		renderPassInfo.clearValueCount		= static_cast<uint32_t>(clearValues.size());
+		renderPassInfo.pClearValues			= clearValues.data();
 
 		vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -240,13 +244,16 @@ namespace ash
 
 		m_swapChain			->createSwapChain(m_window, m_surface.get(), m_physicalDevice.get());
 		m_swapChain			->createImageViews();
-		m_renderPass		->createRenderPass(m_swapChain.get());
+		m_renderPass		->createRenderPass(m_swapChain.get(), m_physicalDevice.get());
 		m_graphicsPipeline	->createPipeline(m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
-		m_swapChain			->createFramebuffers(*m_renderPass);
+		createDepthResources();
+		m_swapChain			->createFramebuffers(*m_renderPass, *m_depthImage);
+
 
 		m_model->createUniformBuffers(m_physicalDevice.get(), m_swapChain->getImageCount());
 		m_descriptorPool->createDescriptorPool(m_swapChain->getImageCount());
 		m_model->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
+		
 		createCommandBuffers();
 
 		//////////////////////////////////////////////////////////////////////////
@@ -359,9 +366,38 @@ namespace ash
 		vkDestroySampler(*m_logicalDevice, m_textureSampler, nullptr);
 	}
 
+	void Graphics::createDepthResources()
+	{
+		VkFormat depthFormat = m_physicalDevice->findDepthFormat();
+
+		VkExtent2D extent{ m_swapChain->getSwapExtent() };
+
+		m_depthImage = std::make_unique<Image>(
+			m_logicalDevice.get(),
+			m_physicalDevice.get(),
+			extent.width,
+			extent.height,
+			depthFormat,
+			VK_IMAGE_TILING_OPTIMAL,
+			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VK_IMAGE_ASPECT_DEPTH_BIT);
+	}
+
+	void Graphics::cleanupDepthResource()
+	{
+		m_depthImage = nullptr;
+	}
+
+	bool Graphics::hasStencilComponent(VkFormat format)
+	{
+		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
+	}
+
 	void Graphics::cleanupSwapChain()
 	{
 		cleanupCommandBuffers();
+		cleanupDepthResource();
 		m_swapChain			->cleanupFramebuffers();
 		m_graphicsPipeline	->cleanupPipeline();
 		m_renderPass		->cleanupRenderPass();

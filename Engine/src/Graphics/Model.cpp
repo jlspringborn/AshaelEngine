@@ -9,10 +9,9 @@ namespace ash
 {
 	Model::Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice, 
 		const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-		VkSampler sampler, VkExtent2D extent) :
+		VkSampler sampler) :
 		m_logicalDevice{ logicalDevice }
 	{
-		createDepthResources(physicalDevice, extent);
 		createTexture(physicalDevice);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
@@ -223,34 +222,5 @@ namespace ash
 		m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 		m_texture->copyFromBuffer(*stagingBuffer, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 		m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	}
-
-	void Model::createDepthResources(const PhysicalDevice* phyiscalDevice, VkExtent2D extent)
-	{
-		VkFormat depthFormat = findDepthFormat(phyiscalDevice);
-
-		m_depthImage = std::make_unique<Image>(m_logicalDevice,
-			phyiscalDevice,
-			extent.width,
-			extent.height,
-			depthFormat,
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VK_IMAGE_ASPECT_DEPTH_BIT);
-	}
-
-	VkFormat Model::findDepthFormat(const PhysicalDevice* phyiscalDevice)
-	{
-		return phyiscalDevice->findSupportedFormat(
-			{VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-			VK_IMAGE_TILING_OPTIMAL,
-			VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-		);
-	}
-
-	bool Model::hasStencilComponent(VkFormat format)
-	{
-		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
 }

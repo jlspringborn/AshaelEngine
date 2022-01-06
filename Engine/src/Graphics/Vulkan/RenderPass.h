@@ -10,7 +10,7 @@ namespace ash
 	class RenderPass
 	{
 	public:
-		RenderPass(const LogicalDevice* logicalDevice, const SwapChain* swapChain);
+		RenderPass(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const PhysicalDevice* physicalDevice);
 		~RenderPass();
 
 		/**
@@ -20,7 +20,7 @@ namespace ash
 
 		void cleanupRenderPass();
 
-		void createRenderPass(const SwapChain* swapChain);
+		void createRenderPass(const SwapChain* swapChain, const PhysicalDevice* physicalDevice);
 
 	private:
 
