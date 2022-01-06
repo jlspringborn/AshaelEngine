@@ -27,6 +27,7 @@
     <ClInclude Include="src\Graphics\Vulkan\DebugMessenger.h" />
     <ClInclude Include="src\Graphics\Vulkan\DescriptorPool.h" />
     <ClInclude Include="src\Graphics\Vulkan\GraphicsPipeline.h" />
+    <ClInclude Include="src\Graphics\Vulkan\Image.h" />
     <ClInclude Include="src\Graphics\Vulkan\Instance.h" />
     <ClInclude Include="src\Graphics\Vulkan\LogicalDevice.h" />
     <ClInclude Include="src\Graphics\Vulkan\PhysicalDevice.h" />
@@ -45,6 +46,7 @@
     <ClCompile Include="src\Graphics\Vulkan\DebugMessenger.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\DescriptorPool.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\GraphicsPipeline.cpp" />
+    <ClCompile Include="src\Graphics\Vulkan\Image.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\Instance.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\LogicalDevice.cpp" />
     <ClCompile Include="src\Graphics\Vulkan\PhysicalDevice.cpp" />

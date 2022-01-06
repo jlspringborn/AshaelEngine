@@ -28,7 +28,7 @@ namespace ash
 		createTextureSampler();
 
 		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(),
-			m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
+			m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_swapChain->getSwapExtent());
 
 		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get());
 		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);

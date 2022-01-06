@@ -8,12 +8,15 @@
 #include "Vulkan/PhysicalDevice.h"
 #include "Vulkan/LogicalDevice.h"
 #include "Vulkan/Buffer.h"
+#include "Vulkan/Image.h"
 
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #include <vulkan/vulkan.h>
 
 #include <chrono>
@@ -25,7 +28,7 @@ namespace ash
 	// TODO: Move this to another script
 	struct Vertex
 	{
-		glm::vec2 pos;
+		glm::vec3 pos;
 		glm::vec3 color;
 		glm::vec2 texCoord;
 
@@ -45,7 +48,7 @@ namespace ash
 			// position
 			attributeDescriptions[0].binding	= 0;
 			attributeDescriptions[0].location	= 0;
-			attributeDescriptions[0].format		= VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[0].format		= VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[0].offset		= offsetof(Vertex, pos);
 
 			// color
@@ -77,7 +80,7 @@ namespace ash
 	public:
 		Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice,
 			const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-			VkSampler sampler);
+			VkSampler sampler, VkExtent2D extent);
 		~Model();
 
 		/**
@@ -116,16 +119,13 @@ namespace ash
 		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler);
 
-		void createTextureImage(const PhysicalDevice* physicalDevice);
+		void createTexture(const PhysicalDevice* physicalDevice);
 
-		void createTexteImageView();
+		void createDepthResources(const PhysicalDevice* phyiscalDevice, VkExtent2D extent);
 
-		void createImage(const PhysicalDevice* physicalDevice, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, 
-			VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+		VkFormat findDepthFormat(const PhysicalDevice* phyiscalDevice);
 
-		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
-
-		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+		bool hasStencilComponent(VkFormat format);
 
 	private:
 
@@ -139,10 +139,15 @@ namespace ash
 		 */
 		const std::vector<Vertex> vertices =
 		{
-			{ {-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f} },
-			{ {0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f} },
-			{ {0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} },
-			{ {-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f} }
+			{ {-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f} },
+			{ {0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} },
+			{ {-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f} },
+
+			{ {-0.5f, -0.5f, 0.5f}, {1.0f, 0.0f, 0.0f}, {1.0f, 0.0f} },
+			{ {0.5f, -0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}, {0.0f, 0.0f} },
+			{ {0.5f, 0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} },
+			{ {-0.5f, 0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f} }
 		};
 
 		/**
@@ -150,7 +155,8 @@ namespace ash
 		 */
 		const std::vector<uint16_t> indices =
 		{
-			0, 1, 2, 2, 3, 0
+			0, 1, 2, 2, 3, 0,
+			4, 5, 6, 6, 7, 4
 		};
 
 		/**
@@ -173,11 +179,10 @@ namespace ash
 		 */
 		std::vector<VkDescriptorSet> descriptorSets{};
 
-		VkImage m_textureImage{};
+		std::unique_ptr<Image> m_texture{};
 
-		VkDeviceMemory m_textureImageMemory{};
+		std::unique_ptr<Image> m_depthImage{};
 
-		VkImageView m_textureImageView{};
 
 	};
 }
