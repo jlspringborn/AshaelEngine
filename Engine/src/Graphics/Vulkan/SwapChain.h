@@ -46,6 +46,9 @@ namespace ash
 
 		VkSwapchainKHR m_swapChain{};
 
+		/**
+		 * Vulkan Logical Device, used for resource destruction
+		 */
 		const LogicalDevice* m_logicalDevice{};
 
 		VkFormat m_imageFormat{};

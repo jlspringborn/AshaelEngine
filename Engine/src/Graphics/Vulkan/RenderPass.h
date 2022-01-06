@@ -24,8 +24,12 @@ namespace ash
 
 	private:
 
+
 		VkRenderPass m_renderPass{};
 
+		/**
+		 * Vulkan Logical Device, used for resource destruction
+		 */
 		const LogicalDevice* m_logicalDevice{};
 		
 
