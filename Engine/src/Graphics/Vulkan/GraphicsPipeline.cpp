@@ -1,6 +1,6 @@
 #include "Vulkan/GraphicsPipeline.h"
 
-#include <Model.h>
+#include "Vulkan/Vertex.hpp"
 
 #include <fstream>
 #include <stdexcept>
