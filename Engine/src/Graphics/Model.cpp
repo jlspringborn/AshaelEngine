@@ -3,6 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#include "Loaders/ModelLoader.hpp"
+
 #include <stdexcept>
 
 namespace ash
@@ -13,6 +15,7 @@ namespace ash
 		m_logicalDevice{ logicalDevice }
 	{
 		createTexture(physicalDevice);
+		loadModel(m_modelPath, m_vertices, m_indices);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
 		createUniformBuffers(physicalDevice, swapChainImageCount);
@@ -28,14 +31,14 @@ namespace ash
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[index], 0, nullptr);
-		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 	}
 
 	void Model::createVertexBuffer(const PhysicalDevice* physicalDevice)
 	{
-		VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+		VkDeviceSize bufferSize = sizeof(m_vertices[0]) * m_vertices.size();
 
 		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
 			m_logicalDevice,
@@ -46,7 +49,7 @@ namespace ash
 
 		void* data;
 		vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
-		memcpy(data, vertices.data(), (size_t)bufferSize);
+		memcpy(data, m_vertices.data(), (size_t)bufferSize);
 		vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
 
 		m_vertexBuffer = std::make_unique<Buffer>(
@@ -62,7 +65,7 @@ namespace ash
 
 	void Model::createIndexBuffer(const PhysicalDevice* physicalDevice)
 	{
-		VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+		VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
 
 		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
 			m_logicalDevice,
@@ -73,7 +76,7 @@ namespace ash
 
 		void* data;
 		vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
-		memcpy(data, indices.data(), (size_t)bufferSize);
+		memcpy(data, m_indices.data(), (size_t)bufferSize);
 		vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
 
 		m_indexBuffer = std::make_unique<Buffer>(
@@ -187,7 +190,7 @@ namespace ash
 		int texWidth;
 		int texHeight;
 		int texChannels;
-		stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(m_texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 

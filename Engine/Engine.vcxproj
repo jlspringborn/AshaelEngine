@@ -34,7 +34,9 @@
     <ClInclude Include="src\Graphics\Vulkan\RenderPass.h" />
     <ClInclude Include="src\Graphics\Vulkan\Surface.h" />
     <ClInclude Include="src\Graphics\Vulkan\SwapChain.h" />
+    <ClInclude Include="src\Graphics\Vulkan\Vertex.hpp" />
     <ClInclude Include="src\Input\Input.h" />
+    <ClInclude Include="src\Loaders\ModelLoader.hpp" />
     <ClInclude Include="src\Window.h" />
   </ItemGroup>
   <ItemGroup>
