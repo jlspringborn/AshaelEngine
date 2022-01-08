@@ -47,22 +47,22 @@ namespace ash
 		// TODO: move command buffer recording to renderGameObjects and record
 		// every frame instead
 
-		for (size_t i = 0; i < m_commandBuffers.size(); i++)
-		{
-			VkCommandBufferBeginInfo beginInfo{};
-			beginInfo.sType				= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			beginInfo.flags				= 0;
-			beginInfo.pInheritanceInfo	= nullptr;
+		//for (size_t i = 0; i < m_commandBuffers.size(); i++)
+		//{
+		//	VkCommandBufferBeginInfo beginInfo{};
+		//	beginInfo.sType				= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		//	beginInfo.flags				= 0;
+		//	beginInfo.pInheritanceInfo	= nullptr;
 
-			if (vkBeginCommandBuffer(m_commandBuffers[i], &beginInfo) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to begin recording command buffer!");
-			}
+		//	if (vkBeginCommandBuffer(m_commandBuffers[i], &beginInfo) != VK_SUCCESS)
+		//	{
+		//		throw std::runtime_error("failed to begin recording command buffer!");
+		//	}
 
-			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
-			m_model->draw(m_commandBuffers[i], m_graphicsPipeline->getLayout(), i);
-			endRenderPass(m_commandBuffers[i]);
-		}
+		//	startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
+		//	m_model->draw(m_commandBuffers[i], m_graphicsPipeline->getLayout(), i);
+		//	endRenderPass(m_commandBuffers[i]);
+		//}
 		//////////////////////////////////////////////////////////////////////////
 	}
 
@@ -76,6 +76,8 @@ namespace ash
 
 	void Graphics::renderGameObjects()
 	{
+		//
+
 		vkWaitForFences(*m_logicalDevice, 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
@@ -99,7 +101,20 @@ namespace ash
 
 		m_imagesInFlight[imageIndex] = m_inFlightFences[m_currentFrame];
 
-		
+		VkCommandBufferBeginInfo beginInfo{};
+		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+		if (vkBeginCommandBuffer(m_commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to begin recording command buffer!");
+		}
+
+		startRenderPass(m_swapChain->getFramebuffers()[imageIndex], m_commandBuffers[imageIndex]);
+		m_model->draw(m_commandBuffers[imageIndex], m_graphicsPipeline->getLayout(), imageIndex);
+		endRenderPass(m_commandBuffers[imageIndex]);
+
+		//
+	
 		VkSemaphore waitSemaphores[]		= { m_imageAvailableSemaphores[m_currentFrame] };
 		VkPipelineStageFlags waitStages[]	= { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[]		= { m_renderFinishedSemaphores[m_currentFrame] };
