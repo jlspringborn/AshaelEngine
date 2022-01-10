@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
+    <ClInclude Include="src\Camera\Camera.h" />
     <ClInclude Include="src\GameObjects\GameObject.h" />
     <ClInclude Include="src\Graphics\Graphics.h" />
     <ClInclude Include="src\Graphics\Model.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="src\Graphics\Vulkan\Instance.h" />
     <ClInclude Include="src\Graphics\Vulkan\LogicalDevice.h" />
     <ClInclude Include="src\Graphics\Vulkan\PhysicalDevice.h" />
+    <ClInclude Include="src\Graphics\Vulkan\PushConstantData.hpp" />
     <ClInclude Include="src\Graphics\Vulkan\RenderPass.h" />
     <ClInclude Include="src\Graphics\Vulkan\Surface.h" />
     <ClInclude Include="src\Graphics\Vulkan\SwapChain.h" />
@@ -41,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
+    <ClCompile Include="src\Camera\Camera.cpp" />
     <ClCompile Include="src\GameObjects\GameObject.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\Model.cpp" />
