@@ -10,6 +10,7 @@
 #include "Vulkan/Buffer.h"
 #include "Vulkan/Image.h"
 #include "Vulkan/Vertex.hpp"
+#include "Vulkan/PushConstantData.hpp"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
@@ -84,6 +85,7 @@ namespace ash
 		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler);
 
+		void setOffset(glm::vec3 offset);
 
 	private:
 
@@ -129,6 +131,8 @@ namespace ash
 		std::vector<VkDescriptorSet> descriptorSets{};
 
 		std::unique_ptr<Image> m_texture{};
+
+		PushConstantData m_push{};
 
 	};
 }

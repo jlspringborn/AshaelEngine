@@ -27,10 +27,6 @@ namespace ash
 		createDescriptorSetLayout();
 		createTextureSampler();
 
-
-		m_model				= std::make_unique<Model>(m_logicalDevice.get(), m_physicalDevice.get(),
-			m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
-
 		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get(), m_physicalDevice.get());
 		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
 
@@ -74,10 +70,8 @@ namespace ash
 		cleanupTextureSampler();
 	}
 
-	void Graphics::renderGameObjects()
+	void Graphics::renderGameObjects(std::vector<std::unique_ptr<Model>>& gameObjects)
 	{
-		//
-
 		vkWaitForFences(*m_logicalDevice, 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
 
 		uint32_t imageIndex;
@@ -86,7 +80,7 @@ namespace ash
 
 		if (result == VK_ERROR_OUT_OF_DATE_KHR)
 		{
-			recreateSwapChain();
+			recreateSwapChain(gameObjects);
 			return;
 		}
 		else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR)
@@ -110,7 +104,10 @@ namespace ash
 		}
 
 		startRenderPass(m_swapChain->getFramebuffers()[imageIndex], m_commandBuffers[imageIndex]);
-		m_model->draw(m_commandBuffers[imageIndex], m_graphicsPipeline->getLayout(), imageIndex);
+		for (size_t i = 0; i < gameObjects.size(); i++)
+		{
+			gameObjects[i]->draw(m_commandBuffers[imageIndex], m_graphicsPipeline->getLayout(), imageIndex);
+		}
 		endRenderPass(m_commandBuffers[imageIndex]);
 
 		//
@@ -119,7 +116,7 @@ namespace ash
 		VkPipelineStageFlags waitStages[]	= { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[]		= { m_renderFinishedSemaphores[m_currentFrame] };
 
-		updateUniformBuffers(imageIndex);
+		updateUniformBuffers(imageIndex, gameObjects);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType				= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -154,7 +151,7 @@ namespace ash
 		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || m_window->getWasWindowResized())
 		{
 			m_window->resetWasWindowResized();
-			recreateSwapChain();
+			recreateSwapChain(gameObjects);
 		}
 		else if (result != VK_SUCCESS)
 		{
@@ -168,6 +165,7 @@ namespace ash
 	{
 		vkDeviceWaitIdle(*m_logicalDevice);
 	}
+
 
 	void Graphics::createCommandBuffers()
 	{
@@ -242,7 +240,7 @@ namespace ash
 		}
 	}
 
-	void Graphics::recreateSwapChain()
+	void Graphics::recreateSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects)
 	{
 		int width{ 0 };
 		int height{ 0 };
@@ -255,7 +253,7 @@ namespace ash
 
 		waitForDeviceIdle();
 		
-		cleanupSwapChain();
+		cleanupSwapChain(gameObjects);
 
 		m_swapChain			->createSwapChain(m_window, m_surface.get(), m_physicalDevice.get());
 		m_swapChain			->createImageViews();
@@ -264,33 +262,14 @@ namespace ash
 		createDepthResources();
 		m_swapChain			->createFramebuffers(*m_renderPass, *m_depthImage);
 
-
-		m_model->createUniformBuffers(m_physicalDevice.get(), m_swapChain->getImageCount());
 		m_descriptorPool->createDescriptorPool(m_swapChain->getImageCount());
-		m_model->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
-		
 		createCommandBuffers();
 
-		//////////////////////////////////////////////////////////////////////////
-		// TODO: move command buffer recording to renderGameObjects and record
-		// every frame instead
-		for (size_t i = 0; i < m_commandBuffers.size(); i++)
+		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
-			VkCommandBufferBeginInfo beginInfo{};
-			beginInfo.sType				= VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			beginInfo.flags				= 0;
-			beginInfo.pInheritanceInfo	= nullptr;
-
-			if (vkBeginCommandBuffer(m_commandBuffers[i], &beginInfo) != VK_SUCCESS)
-			{
-				throw std::runtime_error("failed to begin recording command buffer!");
-			}
-
-			startRenderPass(m_swapChain->getFramebuffers()[i], m_commandBuffers[i]);
-			m_model->draw(m_commandBuffers[i], m_graphicsPipeline->getLayout(), i);
-			endRenderPass(m_commandBuffers[i]);
+			gameObjects[i]->createUniformBuffers(m_physicalDevice.get(), m_swapChain->getImageCount());
+			gameObjects[i]->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler);
 		}
-		//////////////////////////////////////////////////////////////////////////
 	}
 
 	void Graphics::cleanupCommandBuffers()
@@ -309,9 +288,12 @@ namespace ash
 		}
 	}
 
-	void Graphics::updateUniformBuffers(uint32_t currentImage)
+	void Graphics::updateUniformBuffers(uint32_t currentImage, std::vector<std::unique_ptr<Model>>& gameObjects)
 	{
-		m_model->updateUniformBuffer(currentImage, m_swapChain->getSwapExtent());
+		for (size_t i = 0; i < gameObjects.size(); i++)
+		{
+			gameObjects[i]->updateUniformBuffer(currentImage, m_swapChain->getSwapExtent());
+		}
 	}
 
 	void Graphics::createDescriptorSetLayout()
@@ -409,7 +391,7 @@ namespace ash
 		return format == VK_FORMAT_D32_SFLOAT_S8_UINT || format == VK_FORMAT_D24_UNORM_S8_UINT;
 	}
 
-	void Graphics::cleanupSwapChain()
+	void Graphics::cleanupSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects)
 	{
 		cleanupCommandBuffers();
 		cleanupDepthResource();
@@ -418,7 +400,11 @@ namespace ash
 		m_renderPass		->cleanupRenderPass();
 		m_swapChain			->cleanupImageViews();
 		m_swapChain			->cleanupSwapChain();
-		m_model				->cleanupUniformBuffers();
 		m_descriptorPool	->cleanupDescriptorPool();
+
+		for (size_t i = 0; i < gameObjects.size(); i++)
+		{
+			gameObjects[i]->cleanupUniformBuffers();
+		}
 	}
 }

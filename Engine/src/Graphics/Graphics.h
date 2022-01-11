@@ -32,14 +32,12 @@ namespace ash
 		Graphics(Window* window);
 		~Graphics();
 
-		void renderGameObjects();
+		void renderGameObjects(std::vector<std::unique_ptr<Model>>& gameObjects);
 
 		void waitForDeviceIdle();
 
-	private:
 
 		Window* m_window{};
-
 
 		std::unique_ptr<Instance> m_instance{};
 		std::unique_ptr<DebugMessenger> m_debugMessenger{};
@@ -51,9 +49,8 @@ namespace ash
 		std::unique_ptr<GraphicsPipeline> m_graphicsPipeline{};
 		std::unique_ptr<DescriptorPool> m_descriptorPool{};
 		std::unique_ptr<Image> m_depthImage{};
-		std::unique_ptr<Model> m_model{};
-
 		
+
 		std::vector<VkCommandBuffer> m_commandBuffers{};
 
 		std::vector<VkSemaphore> m_imageAvailableSemaphores{};
@@ -68,6 +65,7 @@ namespace ash
 		VkDescriptorSetLayout m_descriptorSetLayout{};
 
 		VkSampler m_textureSampler{};
+	private:
 
 		void createCommandBuffers();
 
@@ -77,15 +75,15 @@ namespace ash
 
 		void endRenderPass(VkCommandBuffer commandBuffer);
 
-		void cleanupSwapChain();
+		void cleanupSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects);
 
-		void recreateSwapChain();
+		void recreateSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects);
 
 		void cleanupCommandBuffers();
 
 		void cleanupSyncObjects();
 
-		void updateUniformBuffers(uint32_t currentImage);
+		void updateUniformBuffers(uint32_t currentImage, std::vector<std::unique_ptr<Model>>& gameObjects);
 
 		void createDescriptorSetLayout();
 

@@ -1,7 +1,5 @@
 #include "Model.h"
 
-#include "Vulkan/PushConstantData.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
@@ -36,10 +34,7 @@ namespace ash
 		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[index], 0, nullptr);
 
-		PushConstantData push{};
-		push.offset = { 0.0f, 0.0f, -1.0f };
-
-		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &push);
+		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &m_push);
 
 		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 	}
@@ -191,6 +186,11 @@ namespace ash
 
 			vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
+	}
+
+	void Model::setOffset(glm::vec3 offset)
+	{
+		m_push.offset = offset;
 	}
 
 	void Model::createTexture(const PhysicalDevice* physicalDevice)
