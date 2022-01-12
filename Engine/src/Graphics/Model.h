@@ -41,7 +41,7 @@ namespace ash
 	public:
 		Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice,
 			const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-			VkSampler sampler);
+			VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
 		~Model();
 
 		/**
@@ -60,22 +60,6 @@ namespace ash
 		void createIndexBuffer(const PhysicalDevice* physicalDevice);
 
 		/**
-		 * Creates a uniform buffer for each swap chain frame to allow for
-		 * matrix transformations during shading
-		 */
-		void createUniformBuffers(const PhysicalDevice* physicalDevice, const int swapChainImageCount);
-
-		/**
-		 * Deletes all uniform buffers, called during swap chain recreation
-		 */
-		void cleanupUniformBuffers();
-
-		/**
-		 * Updates uniform buffers with new transform data
-		 */
-		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
-
-		/**
 		 * Creates texture image to display on geometry
 		 */
 		void createTexture(const PhysicalDevice* physicalDevice);
@@ -83,9 +67,13 @@ namespace ash
 		/**
 		 * Creates a descriptor set for each swap chain image
 		 */
-		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler);
+		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
+
+		void cleanupDescriptorSets();
 
 		void setOffset(glm::vec3 offset);
+
+		const std::vector<VkDescriptorSet>& getDescriptorSets() const { return descriptorSets; }
 
 	private:
 
@@ -119,11 +107,6 @@ namespace ash
 		 * Buffer to hold index of vertices
 		 */
 		std::unique_ptr<Buffer> m_indexBuffer;
-
-		/**
-		 * Array of Uniform buffers, one for each swap chain image
-		 */
-		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 
 		/**
 		 * Array of Descriptor Sets, one for each Uniform Buffer

@@ -65,6 +65,11 @@ namespace ash
 		VkDescriptorSetLayout m_descriptorSetLayout{};
 
 		VkSampler m_textureSampler{};
+
+		/**
+		 * Array of Uniform buffers, one for each swap chain image
+		 */
+		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 	private:
 
 		void createCommandBuffers();
@@ -98,6 +103,25 @@ namespace ash
 		void cleanupDepthResource();
 
 		bool hasStencilComponent(VkFormat format);
+
+		/**
+		 * Creates a uniform buffer for each swap chain frame to allow for
+		 * matrix transformations during shading
+		 */
+		void createUniformBuffers();
+
+		/**
+		 * Deletes all uniform buffers, called during swap chain recreation
+		 */
+		void cleanupUniformBuffers();
+
+		/**
+		 * Updates uniform buffers with new transform data
+		 */
+		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
+
+
+
 
 	};
 }

@@ -16,20 +16,21 @@ namespace ash
 		cleanupDescriptorPool();
 	}
 
+	// TODO: figure out way to calculate desired descriptor count
 	void DescriptorPool::createDescriptorPool(const uint32_t swapChainImagecount)
 	{
 		// all descriptors used by the shader
 		std::array<VkDescriptorPoolSize, 2> poolSizes{};
 		poolSizes[0].type				= VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-		poolSizes[0].descriptorCount	= swapChainImagecount;
+		poolSizes[0].descriptorCount	= 10;	
 		poolSizes[1].type				= VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSizes[1].descriptorCount	= swapChainImagecount;
+		poolSizes[1].descriptorCount	= 10;
 
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType			= VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		poolInfo.poolSizeCount	= static_cast<uint32_t>(poolSizes.size());
 		poolInfo.pPoolSizes		= poolSizes.data();
-		poolInfo.maxSets		= swapChainImagecount;
+		poolInfo.maxSets		= 10;
 
 		if (vkCreateDescriptorPool(*m_logicalDevice, &poolInfo, nullptr, &m_descriptorPool) != VK_SUCCESS)
 		{

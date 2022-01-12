@@ -11,15 +11,15 @@ namespace ash
 {
 	Model::Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice, 
 		const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-		VkSampler sampler) :
+		VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers) :
 		m_logicalDevice{ logicalDevice }
 	{
 		createTexture(physicalDevice);
 		loadModel(m_modelPath, m_vertices, m_indices);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
-		createUniformBuffers(physicalDevice, swapChainImageCount);
-		createDescriptorSets(swapChainImageCount, setLayout, pool, sampler);
+		//createUniformBuffers(physicalDevice, swapChainImageCount);
+		createDescriptorSets(swapChainImageCount, setLayout, pool, sampler, uniformBuffers);
 	}
 
 	Model::~Model()
@@ -30,9 +30,9 @@ namespace ash
 	{
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[index], 0, nullptr);
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[index], 0, nullptr);
 
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &m_push);
 
@@ -92,50 +92,7 @@ namespace ash
 		m_indexBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
 	}
 
-	void Model::createUniformBuffers(const PhysicalDevice* physicalDevice, const int swapChainImageCount)
-	{
-		VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-		
-		m_uniformBuffers.resize(swapChainImageCount);
-
-		for (size_t i = 0; i < swapChainImageCount; i++)
-		{
-			m_uniformBuffers[i] = std::make_unique<Buffer>(m_logicalDevice, 
-				physicalDevice, 
-				bufferSize, 
-				VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		}
-	}
-
-	void Model::cleanupUniformBuffers()
-	{
-		size_t bufferCount{ m_uniformBuffers.size() };
-		for (size_t i = 0; i < bufferCount; i++)
-		{
-			m_uniformBuffers[i] = nullptr;
-		}
-	}
-
-	void Model::updateUniformBuffer(uint32_t currentImage, VkExtent2D extent)
-	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.f);
-		ubo.proj[1][1] *= -1;
-
-		void* data;
-		vkMapMemory(*m_logicalDevice, m_uniformBuffers[currentImage]->getBufferMemory(), 0, sizeof(ubo), 0, &data);
-		memcpy(data, &ubo, sizeof(ubo));
-		vkUnmapMemory(*m_logicalDevice, m_uniformBuffers[currentImage]->getBufferMemory());
-	}
-
-	void Model::createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler)
+	void Model::createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers)
 	{
 		std::vector<VkDescriptorSetLayout> layouts(swapChainImageCount, setLayout);
 
@@ -154,7 +111,7 @@ namespace ash
 		for (size_t i = 0; i < swapChainImageCount; i++)
 		{
 			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = *m_uniformBuffers[i];
+			bufferInfo.buffer = *uniformBuffers[i];
 			bufferInfo.offset = 0;
 			bufferInfo.range = sizeof(UniformBufferObject);
 
@@ -185,6 +142,14 @@ namespace ash
 			
 
 			vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+	}
+
+	void Model::cleanupDescriptorSets()
+	{
+		for (size_t i = 0; i < descriptorSets.size(); i++)
+		{
+			descriptorSets[i] = nullptr;
 		}
 	}
 
