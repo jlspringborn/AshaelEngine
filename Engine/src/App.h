@@ -34,9 +34,19 @@ namespace ash
 
 	private:
 
-
+		/**
+		 * GLFW Window, used to create platform agnostic window for presenting
+		 */
 		std::unique_ptr<Window> m_window{};
+
+		/**
+		 * TODO: process input and emit signals
+		 */
 		std::unique_ptr<Input> m_input{};
+
+		/**
+		 * Manages visual processing and presentation of game scenes
+		 */
 		std::unique_ptr<Graphics> m_graphics{};
 
 		/**

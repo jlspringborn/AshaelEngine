@@ -1,5 +1,7 @@
 #include "Graphics.h"
 
+#include "Vulkan/UniformBufferObject.hpp"
+
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>

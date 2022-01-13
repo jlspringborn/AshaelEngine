@@ -29,12 +29,7 @@ namespace ash
 {
 
 	// TODO: Move this to another script
-	struct UniformBufferObject
-	{
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 proj;
-	};
+
 
 	class Model
 	{
