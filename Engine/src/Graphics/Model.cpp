@@ -9,13 +9,20 @@
 
 namespace ash
 {
-	Model::Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice, 
-		const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-		VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers) :
+	Model::Model(
+		const LogicalDevice* logicalDevice, 
+		const PhysicalDevice* physicalDevice, 
+		const int swapChainImageCount, 
+		VkDescriptorSetLayout setLayout, 
+		VkDescriptorPool pool,
+		VkSampler sampler, 
+		std::vector<std::unique_ptr<Buffer>>& uniformBuffers,
+		std::string modelPath,
+		std::string texturePath) :
 		m_logicalDevice{ logicalDevice }
 	{
-		createTexture(physicalDevice);
-		loadModel(m_modelPath, m_vertices, m_indices);
+		createTexture(physicalDevice, texturePath);
+		loadModel(modelPath, m_vertices, m_indices);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
 		//createUniformBuffers(physicalDevice, swapChainImageCount);
@@ -158,12 +165,12 @@ namespace ash
 		m_push.offset = offset;
 	}
 
-	void Model::createTexture(const PhysicalDevice* physicalDevice)
+	void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)
 	{
 		int texWidth;
 		int texHeight;
 		int texChannels;
-		stbi_uc* pixels = stbi_load(m_texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
 		VkDeviceSize imageSize = texWidth * texHeight * 4;
 

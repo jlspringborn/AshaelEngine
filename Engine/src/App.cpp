@@ -36,12 +36,10 @@ namespace ash
 
 	void App::loadGameObjects()
 	{
-		std::unique_ptr<Model> model = std::make_unique<Model>(m_graphics->m_logicalDevice.get(), m_graphics->m_physicalDevice.get(),
-			m_graphics->m_swapChain->getImageCount(), m_graphics->m_descriptorSetLayout, m_graphics->m_descriptorPool->getPool(), m_graphics->m_textureSampler, m_graphics->m_uniformBuffers);
+		std::unique_ptr<Model> model = m_graphics->generateModel("models/viking_room.obj", "textures/viking_room.png");
 		m_gameObjects.push_back(std::move(model));
 
-		std::unique_ptr<Model> model2 = std::make_unique<Model>(m_graphics->m_logicalDevice.get(), m_graphics->m_physicalDevice.get(),
-			m_graphics->m_swapChain->getImageCount(), m_graphics->m_descriptorSetLayout, m_graphics->m_descriptorPool->getPool(), m_graphics->m_textureSampler, m_graphics->m_uniformBuffers);
+		std::unique_ptr<Model> model2 = m_graphics->generateModel("models/sword.obj", "textures/sword.png");
 		model2->setOffset({0.0f, -0.5f, -0.5f});
 		m_gameObjects.push_back(std::move(model2));
 	}

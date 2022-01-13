@@ -39,9 +39,18 @@ namespace ash
 	class Model
 	{
 	public:
-		Model(const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice,
-			const int swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool,
-			VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
+		Model(
+			const LogicalDevice* logicalDevice, 
+			const PhysicalDevice* physicalDevice,
+			const int swapChainImageCount, 
+			VkDescriptorSetLayout setLayout, 
+			VkDescriptorPool pool,
+			VkSampler sampler, 
+			std::vector<std::unique_ptr<Buffer>>& uniformBuffers,
+			std::string modelPath,
+			std::string texturePath
+		);
+
 		~Model();
 
 		/**
@@ -62,7 +71,7 @@ namespace ash
 		/**
 		 * Creates texture image to display on geometry
 		 */
-		void createTexture(const PhysicalDevice* physicalDevice);
+		void createTexture(const PhysicalDevice* physicalDevice, std::string texturePath);
 
 		/**
 		 * Creates a descriptor set for each swap chain image
@@ -81,12 +90,6 @@ namespace ash
 		 * Vulkan Logical Device, used for resource destruction
 		 */
 		const LogicalDevice* m_logicalDevice{};
-
-		/**
-		 * TEMP variables to hold the model path and texture path
-		 */
-		const std::string m_modelPath = "models/viking_room.obj";
-		const std::string m_texturePath = "textures/viking_room.png";
 
 		/**
 		 * Vertex data of model

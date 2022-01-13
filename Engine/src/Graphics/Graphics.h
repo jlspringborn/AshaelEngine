@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <vector>
+#include <string>
 
 namespace ash
 {
@@ -35,6 +36,8 @@ namespace ash
 		void renderGameObjects(std::vector<std::unique_ptr<Model>>& gameObjects);
 
 		void waitForDeviceIdle();
+
+		std::unique_ptr<Model> generateModel(std::string modelPath, std::string texturePath);
 
 
 		Window* m_window{};
