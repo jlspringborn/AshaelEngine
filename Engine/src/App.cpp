@@ -30,8 +30,6 @@ namespace ash
 		}
 		
 		m_graphics->waitForDeviceIdle();
-
-		cleanupGameObjects();
 	}
 
 	void App::loadGameObjects()
@@ -44,11 +42,4 @@ namespace ash
 		m_gameObjects.push_back(std::move(model2));
 	}
 
-	void App::cleanupGameObjects()
-	{
-		for (size_t i = 0; i < m_gameObjects.size(); i++)
-		{
-			m_gameObjects[i] = nullptr;
-		}
-	}
 }

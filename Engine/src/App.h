@@ -22,13 +22,15 @@ namespace ash
 		~App();
 		
 		/**
-		 * @brief called by game script to start engine
+		 * Called by game script to start engine
 		 */
 		void run();
 
+		/**
+		 * TODO: load objects from scene file instead of manually adding them
+		 */
 		void loadGameObjects();
 
-		void cleanupGameObjects();
 
 	private:
 
@@ -37,6 +39,11 @@ namespace ash
 		std::unique_ptr<Input> m_input{};
 		std::unique_ptr<Graphics> m_graphics{};
 
+		/**
+		 * TODO: replace model with game object class
+		 * Keep below graphics in the load order to ensure smart pointer are
+		 * freed before Graphics, due to dependency on logical device pointer
+		 */
 		std::vector<std::unique_ptr<Model>> m_gameObjects{};
 	};
 }
