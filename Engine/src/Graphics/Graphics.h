@@ -16,7 +16,8 @@
 #include "Vulkan\GraphicsPipeline.h"
 #include "Vulkan\DescriptorPool.h"
 #include "Vulkan\Image.h"
-#include "Model.h"
+#include "GameObjects/GameObject.h"
+#include "Camera/Camera.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -33,11 +34,13 @@ namespace ash
 		Graphics(Window* window);
 		~Graphics();
 
-		void renderGameObjects(std::vector<std::unique_ptr<Model>>& gameObjects);
+		void renderGameObjects(std::vector<std::unique_ptr<GameObject>>& gameObjects,Camera* camera);
 
 		void waitForDeviceIdle();
 
 		std::unique_ptr<Model> generateModel(std::string modelPath, std::string texturePath);
+
+		float getAspectRatio() const { return m_swapChain->extentAspectRatio(); }
 
 
 		Window* m_window{};
@@ -83,15 +86,13 @@ namespace ash
 
 		void endRenderPass(VkCommandBuffer commandBuffer);
 
-		void cleanupSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects);
+		void cleanupSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects);
 
-		void recreateSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects);
+		void recreateSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects);
 
 		void cleanupCommandBuffers();
 
 		void cleanupSyncObjects();
-
-		void updateUniformBuffers(uint32_t currentImage, std::vector<std::unique_ptr<Model>>& gameObjects);
 
 		void createDescriptorSetLayout();
 
@@ -121,7 +122,7 @@ namespace ash
 		/**
 		 * Updates uniform buffers with new transform data
 		 */
-		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent);
+		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent,Camera* camera);
 
 
 

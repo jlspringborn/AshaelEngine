@@ -21,9 +21,11 @@
   <ItemGroup>
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Camera\Camera.h" />
+    <ClInclude Include="src\Camera\CameraController.h" />
     <ClInclude Include="src\GameObjects\GameObject.h" />
     <ClInclude Include="src\Graphics\Graphics.h" />
     <ClInclude Include="src\Graphics\Model.h" />
+    <ClInclude Include="src\Graphics\TransformComponent.hpp" />
     <ClInclude Include="src\Graphics\Vulkan\Buffer.h" />
     <ClInclude Include="src\Graphics\Vulkan\DebugMessenger.h" />
     <ClInclude Include="src\Graphics\Vulkan\DescriptorPool.h" />
@@ -45,6 +47,7 @@
   <ItemGroup>
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Camera\Camera.cpp" />
+    <ClCompile Include="src\Camera\CameraController.cpp" />
     <ClCompile Include="src\GameObjects\GameObject.cpp" />
     <ClCompile Include="src\Graphics\Graphics.cpp" />
     <ClCompile Include="src\Graphics\Model.cpp" />

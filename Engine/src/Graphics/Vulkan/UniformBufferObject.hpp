@@ -10,8 +10,8 @@ namespace ash
 {
 	struct UniformBufferObject
 	{
-		glm::mat4 model;
-		glm::mat4 view;
-		glm::mat4 proj;
+		glm::mat4 model{1.f};
+		glm::mat4 view{1.f};
+		glm::mat4 proj{1.f};
 	};
 }

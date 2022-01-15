@@ -50,7 +50,7 @@ namespace ash
 		cleanupTextureSampler();
 	}
 
-	void Graphics::renderGameObjects(std::vector<std::unique_ptr<Model>>& gameObjects)
+	void Graphics::renderGameObjects(std::vector<std::unique_ptr<GameObject>>& gameObjects,Camera* camera)
 	{
 		vkWaitForFences(*m_logicalDevice, 1, &m_inFlightFences[m_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -96,7 +96,7 @@ namespace ash
 		VkPipelineStageFlags waitStages[]	= { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
 		VkSemaphore signalSemaphores[]		= { m_renderFinishedSemaphores[m_currentFrame] };
 
-		updateUniformBuffers(imageIndex, gameObjects);
+		updateUniformBuffer(imageIndex, m_swapChain->getSwapExtent(), camera);
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType				= VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -237,7 +237,7 @@ namespace ash
 		}
 	}
 
-	void Graphics::recreateSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects)
+	void Graphics::recreateSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects)
 	{
 		int width{ 0 };
 		int height{ 0 };
@@ -266,7 +266,7 @@ namespace ash
 
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
-			gameObjects[i]->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_uniformBuffers);
+			gameObjects[i]->m_model->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_uniformBuffers);
 		}
 	}
 
@@ -284,11 +284,6 @@ namespace ash
 			vkDestroySemaphore(*m_logicalDevice, m_imageAvailableSemaphores[i], nullptr);
 			vkDestroyFence(*m_logicalDevice, m_inFlightFences[i], nullptr);
 		}
-	}
-
-	void Graphics::updateUniformBuffers(uint32_t currentImage, std::vector<std::unique_ptr<Model>>& gameObjects)
-	{
-		updateUniformBuffer(currentImage, m_swapChain->getSwapExtent());
 	}
 
 	void Graphics::createDescriptorSetLayout()
@@ -411,17 +406,16 @@ namespace ash
 		}
 	}
 
-	void Graphics::updateUniformBuffer(uint32_t currentImage, VkExtent2D extent)
+	void Graphics::updateUniformBuffer(uint32_t currentImage, VkExtent2D extent, Camera* camera)
 	{
-		static auto startTime = std::chrono::high_resolution_clock::now();
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
 		UniformBufferObject ubo{};
-		ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.f);
-		ubo.proj[1][1] *= -1;
+		//ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		//ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+		//ubo.proj = glm::perspective(glm::radians(45.0f), extent.width / (float)extent.height, 0.1f, 10.f);
+		//ubo.proj[1][1] *= -1;
+
+		ubo.proj = camera->getProjection();
+		ubo.view = camera->getView();
 
 		void* data;
 		vkMapMemory(*m_logicalDevice, m_uniformBuffers[currentImage]->getBufferMemory(), 0, sizeof(ubo), 0, &data);
@@ -429,11 +423,11 @@ namespace ash
 		vkUnmapMemory(*m_logicalDevice, m_uniformBuffers[currentImage]->getBufferMemory());
 	}
 
-	void Graphics::cleanupSwapChain(std::vector<std::unique_ptr<Model>>& gameObjects)
+	void Graphics::cleanupSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects)
 	{
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
-			gameObjects[i]->cleanupDescriptorSets();
+			gameObjects[i]->m_model->cleanupDescriptorSets();
 		}
 
 		cleanupUniformBuffers();

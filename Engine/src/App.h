@@ -8,7 +8,9 @@
 #include "Window.h"
 #include "Input/Input.h"
 #include "Graphics/Graphics.h"
-#include "Graphics/Model.h"
+#include "GameObjects/GameObject.h"
+#include "Camera/Camera.h"
+#include "Camera/CameraController.h"
 
 #include <memory>
 #include <vector>
@@ -30,7 +32,6 @@ namespace ash
 		 * TODO: load objects from scene file instead of manually adding them
 		 */
 		void loadGameObjects();
-
 
 	private:
 
@@ -54,6 +55,9 @@ namespace ash
 		 * Keep below graphics in the load order to ensure smart pointer are
 		 * freed before Graphics, due to dependency on logical device pointer
 		 */
-		std::vector<std::unique_ptr<Model>> m_gameObjects{};
+		std::vector<std::unique_ptr<GameObject>> m_gameObjects{};
+
+		Camera* m_camera{};
+		CameraController* m_cameraController{};
 	};
 }

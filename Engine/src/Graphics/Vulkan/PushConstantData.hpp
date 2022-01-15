@@ -9,6 +9,6 @@ namespace ash
 {
 	struct PushConstantData
 	{
-		glm::vec3 offset;
+		glm::mat4 transform;
 	};
 }

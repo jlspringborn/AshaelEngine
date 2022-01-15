@@ -1,6 +1,7 @@
 #include "Model.h"
 
 #include "Vulkan/UniformBufferObject.hpp"
+#include "Vulkan/PushConstantData.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -35,7 +36,7 @@ namespace ash
 	{
 	}
 
-	void Model::draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index)
+	void Model::draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index,TransformComponent* transform)
 	{
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
@@ -43,7 +44,11 @@ namespace ash
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
-		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &m_push);
+		PushConstantData push{};
+		auto newTransform = transform->mat4();
+		push.transform = transform->mat4();
+
+		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &push);
 
 		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
 	}
@@ -160,11 +165,6 @@ namespace ash
 		{
 			descriptorSets[i] = nullptr;
 		}
-	}
-
-	void Model::setOffset(glm::vec3 offset)
-	{
-		m_push.offset = offset;
 	}
 
 	void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)

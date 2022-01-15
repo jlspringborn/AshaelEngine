@@ -1,9 +1,12 @@
 #include "App.h"
 
+#include "GameObjects/GameObject.h"
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
 #include <iostream>
+#include <chrono>
 
 
 namespace ash
@@ -13,6 +16,8 @@ namespace ash
 		m_input(std::make_unique<Input>()),
 		m_graphics(std::make_unique<Graphics>(m_window.get()))
 	{
+		m_camera = new Camera();
+		m_cameraController = new CameraController();
 	}
 
 	App::~App()
@@ -23,10 +28,41 @@ namespace ash
 	{
 		loadGameObjects();
 
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
+		auto viewerObject = new GameObject();
+		viewerObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, -.5f, -2.5f });
+
 		while (!m_window->shouldClose())
 		{
 			m_input->update();
-			m_graphics->renderGameObjects(m_gameObjects);
+
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+			//frameTime = glm::min(frameTime, m_maxFrameTime)
+			currentTime = newTime;
+
+			m_camera->update(m_graphics->getAspectRatio());
+			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
+			if (glfwGetMouseButton(m_window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+			{
+				glm::vec3 direction{};
+				direction.x = cos(glm::radians(m_window->yaw)) * cos(glm::radians(m_window->pitch));
+				direction.y = sin(glm::radians(m_window->pitch));
+				direction.z = sin(glm::radians(m_window->yaw)) * cos(glm::radians(m_window->pitch));
+				glm::vec3 forwardDirection = glm::normalize(direction);
+				forwardDirection.x *= -1;
+				forwardDirection.y *= -1;
+
+				glm::vec3 const up(0.f, -1.f, 0.f);
+				m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, forwardDirection);
+				std::cout << "forwardDirection.x: " << forwardDirection.x << '\n';
+				std::cout << "forwardDirection.y: " << forwardDirection.x << '\n';
+				std::cout << "forwardDirection.z: " << forwardDirection.x << '\n';
+			}
+			//m_camera->setViewYXZ(viewerObject->m_transformComponent.m_translation, viewerObject->m_transformComponent.m_rotation);
+
+			m_graphics->renderGameObjects(m_gameObjects, m_camera);
 		}
 		
 		m_graphics->waitForDeviceIdle();
@@ -34,12 +70,14 @@ namespace ash
 
 	void App::loadGameObjects()
 	{
-		std::unique_ptr<Model> model = m_graphics->generateModel("models/viking_room.obj", "textures/viking_room.png");
-		m_gameObjects.push_back(std::move(model));
+		std::unique_ptr<GameObject> gameObject = 
+			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room_adjusted.obj", "textures/viking_room.png"));
+		//gameObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, 0.0f, 20.f });
+		m_gameObjects.push_back(std::move(gameObject));
 
-		std::unique_ptr<Model> model2 = m_graphics->generateModel("models/sword.obj", "textures/sword.png");
-		model2->setOffset({0.0f, -0.5f, -0.5f});
-		m_gameObjects.push_back(std::move(model2));
+		//std::unique_ptr<GameObject> gameObject2 =
+		//	std::make_unique<GameObject>(m_graphics->generateModel("models/sword.obj", "textures/sword.png"));
+		//m_gameObjects.push_back(std::move(gameObject2));
+
 	}
-
 }

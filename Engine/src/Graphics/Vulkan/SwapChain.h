@@ -42,6 +42,11 @@ namespace ash
 
 		void createImageViews();
 
+		float extentAspectRatio() 
+		{
+			return static_cast<float>(m_swapExtent.width) / static_cast<float>(m_swapExtent.height);
+		}
+
 	private:
 
 		VkSwapchainKHR m_swapChain{};

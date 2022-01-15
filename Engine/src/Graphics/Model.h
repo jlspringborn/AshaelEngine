@@ -11,12 +11,8 @@
 #include "Vulkan/Image.h"
 #include "Vulkan/Vertex.hpp"
 #include "Vulkan/PushConstantData.hpp"
+#include "TransformComponent.hpp"
 
-#define GLM_FORCE_RADIANS
-#define GLM_FORCE_DEFAULT_ALIGNED_GENTYPES
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 
 #include <vulkan/vulkan.h>
 
@@ -51,7 +47,7 @@ namespace ash
 		/**
 		 * Binds buffers and descriptor set, then calls draw command
 		 */
-		void draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index);
+		void draw(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, size_t index, TransformComponent* transform);
 
 		/**
 		 * Creates buffer to hold vertices
@@ -74,8 +70,6 @@ namespace ash
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
 
 		void cleanupDescriptorSets();
-
-		void setOffset(glm::vec3 offset);
 
 		const std::vector<VkDescriptorSet>& getDescriptorSets() const { return descriptorSets; }
 
@@ -112,8 +106,6 @@ namespace ash
 		std::vector<VkDescriptorSet> descriptorSets{};
 
 		std::unique_ptr<Image> m_texture{};
-
-		PushConstantData m_push{};
 
 	};
 }

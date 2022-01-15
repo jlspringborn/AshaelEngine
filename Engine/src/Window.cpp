@@ -1,10 +1,10 @@
 #include "Window.h"
 
-#include <iostream>	// for logging
 
 namespace ash
 {
-	Window::Window(const int width, const int height)
+	Window::Window(const int width, const int height) :
+		lastX{ static_cast<float>(width) / 2.f }, lastY{ static_cast<float>(height) / 2.f }
 	{
 		glfwInit();	// starts glfw
 
@@ -13,6 +13,9 @@ namespace ash
 		m_window = glfwCreateWindow(width, height, "Ashael", nullptr, nullptr);	// create the window
 		glfwSetWindowUserPointer(m_window, this);
 		glfwSetFramebufferSizeCallback(m_window, framebufferResizedCallback);
+
+		glfwSetInputMode(m_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+		glfwSetCursorPosCallback(m_window, mouseCallback);
 	}
 
 	Window::~Window()
