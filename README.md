@@ -9,7 +9,7 @@
 ## Dependencies
  * [Vulkan](https://www.khronos.org/vulkan) - Vulkan interface
  * [GLFW](https://github.com/glfw/glfw) - Window creation
- * [Glslc](https://github.com/google/shaderc/tree/main/glslc) - Shader compiling
+ * [glslc](https://github.com/google/shaderc/tree/main/glslc) - Shader compiling
  * [tiny_obj_loader](https://github.com/tinyobjloader/tinyobjloader) - obj file loading
  * [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h) - image loading
  
