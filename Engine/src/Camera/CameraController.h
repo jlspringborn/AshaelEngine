@@ -39,7 +39,13 @@ namespace ash
 		float m_lookSpeed{ 1.5f };
 
 		glm::vec3 m_forwardDirection{0.f, 0.f, -1.f};
+
+		float m_yaw{};
+
+		float m_pitch{};
 	private:
+
+		void updateForwardDirection(Window* window);
 
 	};
 }

@@ -16,14 +16,7 @@ namespace ash
 
 	void CameraController::moveInPlaneXZ(Window* window, float deltaTime, GameObject* gameObject)
 	{
-		// Set forward direction based on mouse input
-		glm::vec3 direction{};
-		direction.x = cos(glm::radians(window->yaw)) * cos(glm::radians(window->pitch));
-		direction.y = sin(glm::radians(window->pitch));
-		direction.z = sin(glm::radians(window->yaw)) * cos(glm::radians(window->pitch));
-		m_forwardDirection = glm::normalize(direction);
-		m_forwardDirection.x *= -1;
-		m_forwardDirection.y *= -1;
+		updateForwardDirection(window);
 
 		// Rotate based on arrow keys
 		//glm::vec3 rotate{ 0 };
@@ -66,5 +59,17 @@ namespace ash
 
 	void CameraController::getMouseMovement(Window* window)
 	{
+	}
+
+	void CameraController::updateForwardDirection(Window* window)
+	{
+		// Set forward direction based on mouse input
+		glm::vec3 direction{};
+		direction.x = cos(glm::radians(window->yaw)) * cos(glm::radians(window->pitch));
+		direction.y = sin(glm::radians(window->pitch));
+		direction.z = sin(glm::radians(window->yaw)) * cos(glm::radians(window->pitch));
+		m_forwardDirection = glm::normalize(direction);
+		m_forwardDirection.x *= -1;
+		m_forwardDirection.y *= -1;
 	}
 }
