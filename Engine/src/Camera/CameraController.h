@@ -37,6 +37,8 @@ namespace ash
 		float m_moveSpeed{ 3.f };
 
 		float m_lookSpeed{ 1.5f };
+
+		glm::vec3 m_forwardDirection{0.f, 0.f, -1.f};
 	private:
 
 	};

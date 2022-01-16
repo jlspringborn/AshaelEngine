@@ -44,22 +44,7 @@ namespace ash
 
 			m_camera->update(m_graphics->getAspectRatio());
 			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
-			if (glfwGetMouseButton(m_window->getWindow(), GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
-			{
-				glm::vec3 direction{};
-				direction.x = cos(glm::radians(m_window->yaw)) * cos(glm::radians(m_window->pitch));
-				direction.y = sin(glm::radians(m_window->pitch));
-				direction.z = sin(glm::radians(m_window->yaw)) * cos(glm::radians(m_window->pitch));
-				glm::vec3 forwardDirection = glm::normalize(direction);
-				forwardDirection.x *= -1;
-				forwardDirection.y *= -1;
-
-				glm::vec3 const up(0.f, -1.f, 0.f);
-				m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, forwardDirection);
-				std::cout << "forwardDirection.x: " << forwardDirection.x << '\n';
-				std::cout << "forwardDirection.y: " << forwardDirection.x << '\n';
-				std::cout << "forwardDirection.z: " << forwardDirection.x << '\n';
-			}
+			m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, m_cameraController->m_forwardDirection);
 			//m_camera->setViewYXZ(viewerObject->m_transformComponent.m_translation, viewerObject->m_transformComponent.m_rotation);
 
 			m_graphics->renderGameObjects(m_gameObjects, m_camera);
@@ -75,9 +60,10 @@ namespace ash
 		//gameObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, 0.0f, 20.f });
 		m_gameObjects.push_back(std::move(gameObject));
 
-		//std::unique_ptr<GameObject> gameObject2 =
-		//	std::make_unique<GameObject>(m_graphics->generateModel("models/sword.obj", "textures/sword.png"));
-		//m_gameObjects.push_back(std::move(gameObject2));
+		std::unique_ptr<GameObject> gameObject2 =
+			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room_adjusted.obj", "textures/viking_room.png"));
+		gameObject2->m_transformComponent.setTranslation(glm::vec3{ -1.5f, 0.0f, 0.f });
+		m_gameObjects.push_back(std::move(gameObject2));
 
 	}
 }
