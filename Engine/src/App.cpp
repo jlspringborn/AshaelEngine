@@ -42,7 +42,7 @@ namespace ash
 			//frameTime = glm::min(frameTime, m_maxFrameTime)
 			currentTime = newTime;
 
-			m_camera->update(m_graphics->getAspectRatio());
+			m_camera->setPerspectiveProjection(glm::radians(45.0f), m_graphics->getAspectRatio(), 0.1f, 10.f);
 			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
 			m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, m_cameraController->m_forwardDirection);
 			//m_camera->setViewYXZ(viewerObject->m_transformComponent.m_translation, viewerObject->m_transformComponent.m_rotation);

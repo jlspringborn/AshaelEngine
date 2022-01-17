@@ -5,8 +5,8 @@
  */
 #include "App.h"
 
-#include <stdexcept>	// for error handling
 #include <iostream>		// for printing error messages
+#include <stdexcept>	// for exception handling
 #include <cstdlib>		// for EXIT_FAILURE & EXIT_SUCCESS
 
 #include <memory>

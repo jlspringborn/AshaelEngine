@@ -13,13 +13,6 @@ namespace ash
 	{
 	}
 
-	void Camera::update(float aspect)
-	{
-		//setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
-		//setViewDirection(glm::vec3(0.f, 0.f, 0.f), glm::vec3(0.0f, 0.f, 0.f));
-		setPerspectiveProjection(glm::radians(45.0f), aspect, 0.1f, 10.f);
-	}
-
 	void Camera::setOrthographicProjection(float left, float right, float top, float bottom, float near, float far)
 	{
 		m_projectionMatrix = glm::mat4{ 1.0f };
@@ -65,7 +58,6 @@ namespace ash
 
 	void Camera::setViewTarget(glm::vec3 position, glm::vec3 target, glm::vec3 up)
 	{
-		// TODO: add assertion that direction isn't 0
 		setViewDirection(position, target - position, up);
 	}
 
