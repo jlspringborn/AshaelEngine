@@ -11,13 +11,15 @@
 
 namespace ash
 {
+	// TODO: remove hard coded window size
 	App::App() :
 		m_window(std::make_unique<Window>(1920, 1080)),
 		m_input(std::make_unique<Input>()),
-		m_graphics(std::make_unique<Graphics>(m_window.get()))
+		m_graphics(std::make_unique<Graphics>(m_window.get())),
+		m_camera(std::make_unique<Camera>()),
+		m_cameraController(std::make_unique<CameraController>())
 	{
-		m_camera = new Camera();
-		m_cameraController = new CameraController();
+
 	}
 
 	App::~App()
@@ -26,10 +28,12 @@ namespace ash
 
 	void App::run()
 	{
+		// TODO: load from scene file
 		loadGameObjects();
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
+		// Create the viewer object which will contain the camera's position and rotation
 		auto viewerObject = new GameObject();
 		viewerObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, -.5f, -2.5f });
 
@@ -39,17 +43,25 @@ namespace ash
 
 			auto newTime = std::chrono::high_resolution_clock::now();
 			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
-			//frameTime = glm::min(frameTime, m_maxFrameTime)
+			// TODO: add max frame time variable to prevent jitter during extended resizing
+			//frameTime = glm::min(frameTime, m_maxFrameTime) 
 			currentTime = newTime;
 
+			// TODO: move camera function calls to it's own function to cleanup loop
+			// Set camera projection mode, this updates because the aspect ratio can change during a swap chain recreation
 			m_camera->setPerspectiveProjection(glm::radians(45.0f), m_graphics->getAspectRatio(), 0.1f, 10.f);
-			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
-			m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, m_cameraController->m_forwardDirection);
-			//m_camera->setViewYXZ(viewerObject->m_transformComponent.m_translation, viewerObject->m_transformComponent.m_rotation);
 
-			m_graphics->renderGameObjects(m_gameObjects, m_camera);
+			// Move camera controller and update forward direction based on mouse input
+			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
+
+			// Set view direction
+			m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, m_cameraController->m_forwardDirection);
+
+			// Render provided game objects based on provided camera view and projection matrix info
+			m_graphics->renderGameObjects(m_gameObjects, m_camera.get());
 		}
 		
+		// Prevents error if scene closes before Vulkan process is finished
 		m_graphics->waitForDeviceIdle();
 	}
 

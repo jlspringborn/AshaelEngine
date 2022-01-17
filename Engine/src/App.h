@@ -12,8 +12,8 @@
 #include "Camera/Camera.h"
 #include "Camera/CameraController.h"
 
-#include <memory>
-#include <vector>
+#include <memory>	// for unique_ptr
+#include <vector>	// for GameObject array
 
 namespace ash
 {
@@ -51,13 +51,20 @@ namespace ash
 		std::unique_ptr<Graphics> m_graphics{};
 
 		/**
-		 * TODO: replace model with game object class
 		 * Keep below graphics in the load order to ensure smart pointer are
 		 * freed before Graphics, due to dependency on logical device pointer
 		 */
 		std::vector<std::unique_ptr<GameObject>> m_gameObjects{};
 
-		Camera* m_camera{};
-		CameraController* m_cameraController{};
+		/**
+		 * Contains view and projection matrices used for rendering
+		 */
+		std::unique_ptr<Camera> m_camera{};
+
+		/**
+		 * Processes input and and adjusts viewerObject transform information
+		 * viewerObject is created in the run() function
+		 */
+		std::unique_ptr<CameraController> m_cameraController{};
 	};
 }
