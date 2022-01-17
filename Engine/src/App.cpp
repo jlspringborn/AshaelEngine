@@ -35,11 +35,15 @@ namespace ash
 
 		// Create the viewer object which will contain the camera's position and rotation
 		auto viewerObject = new GameObject();
-		viewerObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, -.5f, -2.5f });
+		viewerObject->getTransform().setTranslation(glm::vec3{ 0.0f, -.5f, -2.5f });
 
 		while (!m_window->shouldClose())
 		{
 			m_input->update();
+			if (glfwGetKey(m_window->getWindow(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
+			{
+				m_window->closeWindow();
+			}
 
 			auto newTime = std::chrono::high_resolution_clock::now();
 			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
@@ -52,10 +56,10 @@ namespace ash
 			m_camera->setPerspectiveProjection(glm::radians(45.0f), m_graphics->getAspectRatio(), 0.1f, 10.f);
 
 			// Move camera controller and update forward direction based on mouse input
-			m_cameraController->moveInPlaneXZ(m_window.get(), frameTime, viewerObject);
+			m_cameraController->move(m_window.get(), frameTime, viewerObject);
 
 			// Set view direction
-			m_camera->setViewDirection(viewerObject->m_transformComponent.m_translation, m_cameraController->m_forwardDirection);
+			m_camera->setViewDirection(viewerObject->getTransform().m_translation, m_cameraController->getForwardDirection());
 
 			// Render provided game objects based on provided camera view and projection matrix info
 			m_graphics->renderGameObjects(m_gameObjects, m_camera.get());
@@ -74,7 +78,7 @@ namespace ash
 
 		std::unique_ptr<GameObject> gameObject2 =
 			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room_adjusted.obj", "textures/viking_room.png"));
-		gameObject2->m_transformComponent.setTranslation(glm::vec3{ -1.5f, 0.0f, 0.f });
+		gameObject2->getTransform().setTranslation(glm::vec3{ -1.5f, 0.0f, 0.f });
 		m_gameObjects.push_back(std::move(gameObject2));
 
 	}

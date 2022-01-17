@@ -14,25 +14,10 @@ namespace ash
 	{
 	}
 
-	void CameraController::moveInPlaneXZ(Window* window, float deltaTime, GameObject* gameObject)
+	void CameraController::move(Window* window, float deltaTime, GameObject* gameObject)
 	{
+		// Update forward direction based on movement
 		updateForwardDirection(window);
-
-		// Rotate based on arrow keys
-		//glm::vec3 rotate{ 0 };
-		//if (glfwGetKey(window->getWindow(), m_keys.lookRight) == GLFW_PRESS) { rotate.y += 1.f; }
-		//if (glfwGetKey(window->getWindow(), m_keys.lookLeft) == GLFW_PRESS) { rotate.y -= 1.f; }
-		//if (glfwGetKey(window->getWindow(), m_keys.lookUp) == GLFW_PRESS) { rotate.x += 1.f; }
-		//if (glfwGetKey(window->getWindow(), m_keys.lookDown) == GLFW_PRESS) { rotate.x -= 1.f; }
-
-		//if (glm::dot(rotate, rotate) > std::numeric_limits<float>::epsilon())
-		//{
-		//	gameObject->m_transformComponent.m_rotation += m_lookSpeed * deltaTime * glm::normalize(rotate);
-		//}
-
-		//gameObject->m_transformComponent.m_rotation.x = glm::clamp(gameObject->m_transformComponent.m_rotation.x, -1.5f, 1.5f);
-		//gameObject->m_transformComponent.m_rotation.y = glm::mod(gameObject->m_transformComponent.m_rotation.y, glm::two_pi<float>());
-
 
 		// Prevents vertical movement with forward, backward, and side to size keys
 		const glm::vec3 forwardDirection{ m_forwardDirection.x, 0.f, m_forwardDirection.z };
@@ -53,12 +38,8 @@ namespace ash
 		// Move if any movement keys were pressed
 		if (glm::dot(moveDirection, moveDirection) > std::numeric_limits<float>::epsilon())
 		{
-			gameObject->m_transformComponent.m_translation += m_lookSpeed * deltaTime * glm::normalize(moveDirection);
+			gameObject->getTransform().m_translation += m_lookSpeed * deltaTime * glm::normalize(moveDirection);
 		}
-	}
-
-	void CameraController::getMouseMovement(Window* window)
-	{
 	}
 
 	void CameraController::updateForwardDirection(Window* window)

@@ -23,6 +23,8 @@ namespace ash
 		 */
 		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
 
+		void closeWindow() { glfwSetWindowShouldClose(m_window, GLFW_TRUE); }
+
 		GLFWwindow* getWindow() const { return m_window; }
 
 		const VkExtent2D getWindowExtent() const;

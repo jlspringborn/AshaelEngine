@@ -1,3 +1,8 @@
+/**
+* Wrapper for Vulkan RenderPass
+*
+* Copyright (C) 2021, Jesse Springborn
+*/
 #pragma once
 
 #include "Vulkan/LogicalDevice.h"
@@ -7,6 +12,9 @@
 
 namespace ash
 {
+	/**
+	 * Wrapper for the Vulkan RenderPass
+	 */
 	class RenderPass
 	{
 	public:
@@ -18,13 +26,21 @@ namespace ash
 		 */
 		operator const VkRenderPass& () const { return m_renderPass; }
 
+		/**
+		 * Cleans up Vulkan RenderPass, called during swap chain recreation
+		 */
 		void cleanupRenderPass();
 
+		/**
+		 * Creates the Vulkan RenderPass
+		 */
 		void createRenderPass(const SwapChain* swapChain, const PhysicalDevice* physicalDevice);
 
 	private:
-
-
+		
+		/**
+		 * Vulkan RenderPass, contains configuration info for upcoming render operations
+		 */
 		VkRenderPass m_renderPass{};
 
 		/**

@@ -2,9 +2,9 @@
 
 #include "Vulkan\DebugMessenger.h"	// for instance creation debugging
 
+#include <iostream>
 #include <stdexcept>
 #include <vector>
-#include <iostream>
 
 namespace ash
 {
@@ -17,38 +17,38 @@ namespace ash
 
 		// optional app info
 		VkApplicationInfo appInfo{};
-		appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-		appInfo.pApplicationName = "Ashael App";
-		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.pEngineName = "Ashael Engine";
-		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_0;
+		appInfo.sType				= VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		appInfo.pApplicationName	= "Ashael App";
+		appInfo.applicationVersion	= VK_MAKE_VERSION(1, 0, 0);
+		appInfo.pEngineName			= "Ashael Engine";
+		appInfo.engineVersion		= VK_MAKE_VERSION(1, 0, 0);
+		appInfo.apiVersion			= VK_API_VERSION_1_0;
 
 		// instance creation info
 		VkInstanceCreateInfo createInfo{};
-		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.sType			= VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
 
 		// required extensions for glfw
 		auto extensions = getRequiredExtensions();
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(extensions.size());
-		createInfo.ppEnabledExtensionNames = extensions.data();
+		createInfo.enabledExtensionCount	= static_cast<uint32_t>(extensions.size());
+		createInfo.ppEnabledExtensionNames	= extensions.data();
 
 		// debug messenger for instance creation
 		VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo{};
 		// validation layers
 		if (isValidationEnabled)
 		{
-			createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
-			createInfo.ppEnabledLayerNames = m_validationLayers.data();
+			createInfo.enabledLayerCount	= static_cast<uint32_t>(m_validationLayers.size());
+			createInfo.ppEnabledLayerNames	= m_validationLayers.data();
 
 			DebugMessenger::populateDebugMessengerCreateInfo(debugCreateInfo);
 			createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
 		}
 		else
 		{
-			createInfo.enabledLayerCount = 0;
-			createInfo.pNext = nullptr;
+			createInfo.enabledLayerCount	= 0;
+			createInfo.pNext				= nullptr;
 		}
 
 		// creation call

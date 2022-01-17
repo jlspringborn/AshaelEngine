@@ -35,6 +35,9 @@ namespace ash
 		 */
 		void cleanupDescriptorPool();
 
+		/**
+		 * Returns reference to the descriptor pool
+		 */
 		const VkDescriptorPool& getPool() const { return m_descriptorPool; }
 
 	private:

@@ -50,10 +50,15 @@ namespace ash
 		 */
 		const VkCommandPool& getCommandPool() const { return m_commandPool; }
 
+		/**
+		 * Returns a command buffer that's started recording
+		 */
 		const VkCommandBuffer beginSingleTimeCommand() const;
 
+		/**
+		 * Ends recording of provided command buffer
+		 */
 		const void endSingleTimeCommand(VkCommandBuffer commandBuffer) const;
-
 
 	private:
 		

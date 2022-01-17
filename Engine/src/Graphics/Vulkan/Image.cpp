@@ -35,21 +35,22 @@ namespace ash
 		VkImageUsageFlags usage, 
 		VkMemoryPropertyFlags properties)
 	{
+		// Image creation info
 		VkImageCreateInfo imageInfo{};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageInfo.extent.width = width;
+		imageInfo.sType			= VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType		= VK_IMAGE_TYPE_2D;
+		imageInfo.extent.width	= width;
 		imageInfo.extent.height = height;
-		imageInfo.extent.depth = 1;
-		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = 1;
-		imageInfo.format = format;
-		imageInfo.tiling = tiling;
+		imageInfo.extent.depth	= 1;
+		imageInfo.mipLevels		= 1;
+		imageInfo.arrayLayers	= 1;
+		imageInfo.format		= format;
+		imageInfo.tiling		= tiling;
 		imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = usage;
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.flags = 0;
+		imageInfo.usage			= usage;
+		imageInfo.sharingMode	= VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.samples		= VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.flags			= 0;
 
 		if (vkCreateImage(*m_logicalDevice, &imageInfo, nullptr, &m_image) != VK_SUCCESS)
 		{
@@ -60,9 +61,9 @@ namespace ash
 		vkGetImageMemoryRequirements(*m_logicalDevice, m_image, &memRequirements);
 
 		VkMemoryAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-		allocInfo.allocationSize = memRequirements.size;
-		allocInfo.memoryTypeIndex = physicalDevice->findMemoryType(
+		allocInfo.sType				= VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+		allocInfo.allocationSize	= memRequirements.size;
+		allocInfo.memoryTypeIndex	= physicalDevice->findMemoryType(
 			memRequirements.memoryTypeBits, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 		if (vkAllocateMemory(*m_logicalDevice, &allocInfo, nullptr, &m_imageMemory) != VK_SUCCESS)
@@ -76,15 +77,15 @@ namespace ash
 	void Image::createImageView(VkFormat format, VkImageAspectFlags aspectFlags)
 	{
 		VkImageViewCreateInfo viewInfo{};
-		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewInfo.image = m_image;
-		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewInfo.format = format;
-		viewInfo.subresourceRange.aspectMask = aspectFlags;
-		viewInfo.subresourceRange.baseMipLevel = 0;
-		viewInfo.subresourceRange.levelCount = 1;
-		viewInfo.subresourceRange.baseArrayLayer = 0;
-		viewInfo.subresourceRange.layerCount = 1;
+		viewInfo.sType								= VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image								= m_image;
+		viewInfo.viewType							= VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format								= format;
+		viewInfo.subresourceRange.aspectMask		= aspectFlags;
+		viewInfo.subresourceRange.baseMipLevel		= 0;
+		viewInfo.subresourceRange.levelCount		= 1;
+		viewInfo.subresourceRange.baseArrayLayer	= 0;
+		viewInfo.subresourceRange.layerCount		= 1;
 
 		if (vkCreateImageView(*m_logicalDevice, &viewInfo, nullptr, &m_imageView) != VK_SUCCESS)
 		{
@@ -97,19 +98,19 @@ namespace ash
 		VkCommandBuffer commandBuffer = m_logicalDevice->beginSingleTimeCommand();
 
 		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = oldLayout;
-		barrier.newLayout = newLayout;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = m_image;
-		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
+		barrier.sType							= VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout						= oldLayout;
+		barrier.newLayout						= newLayout;
+		barrier.srcQueueFamilyIndex				= VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex				= VK_QUEUE_FAMILY_IGNORED;
+		barrier.image							= m_image;
+		barrier.subresourceRange.aspectMask		= VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel	= 0;
+		barrier.subresourceRange.levelCount		= 1;
 		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
-		barrier.srcAccessMask = 0;
-		barrier.dstAccessMask = 0;
+		barrier.subresourceRange.layerCount		= 1;
+		barrier.srcAccessMask					= 0;
+		barrier.dstAccessMask					= 0;
 
 		VkPipelineStageFlags srcStage;
 		VkPipelineStageFlags dstStage;
@@ -151,22 +152,17 @@ namespace ash
 		VkCommandBuffer commandBuffer = m_logicalDevice->beginSingleTimeCommand();
 
 		VkBufferImageCopy region{};
-		region.bufferOffset = 0;
-		region.bufferRowLength = 0;
-		region.bufferImageHeight = 0;
+		region.bufferOffset			= 0;
+		region.bufferRowLength		= 0;
+		region.bufferImageHeight	= 0;
 
-		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-		region.imageSubresource.mipLevel = 0;
-		region.imageSubresource.baseArrayLayer = 0;
-		region.imageSubresource.layerCount = 1;
+		region.imageSubresource.aspectMask		= VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel		= 0;
+		region.imageSubresource.baseArrayLayer	= 0;
+		region.imageSubresource.layerCount		= 1;
 
 		region.imageOffset = { 0,0,0 };
-		region.imageExtent =
-		{
-			width,
-			height,
-			1
-		};
+		region.imageExtent = { width, height, 1 };
 
 		vkCmdCopyBufferToImage(
 			commandBuffer,

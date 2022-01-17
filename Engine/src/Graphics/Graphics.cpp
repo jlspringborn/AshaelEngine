@@ -266,7 +266,7 @@ namespace ash
 
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
-			gameObjects[i]->m_model->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_uniformBuffers);
+			gameObjects[i]->getModel()->createDescriptorSets(m_swapChain->getImageCount(), m_descriptorSetLayout, *m_descriptorPool, m_textureSampler, m_uniformBuffers);
 		}
 	}
 
@@ -427,7 +427,7 @@ namespace ash
 	{
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
-			gameObjects[i]->m_model->cleanupDescriptorSets();
+			gameObjects[i]->getModel()->cleanupDescriptorSets();
 		}
 
 		cleanupUniformBuffers();

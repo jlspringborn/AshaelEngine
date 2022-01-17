@@ -35,6 +35,9 @@ namespace ash
 			}
 		};
 
+		/**
+		 * Struct that contains swap chain support info of GPU
+		 */
 		struct SwapChainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR capabilities;
@@ -96,6 +99,9 @@ namespace ash
 		 */
 		const uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 
+		/**
+		 * Finds and returns the supported depth format of the GPU
+		 */
 		const VkFormat findDepthFormat() const;
 
 		/**
@@ -110,28 +116,64 @@ namespace ash
 		 */
 		VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
 		
+		/**
+		 * Surface used to write images to the screen, needed for config info
+		 */
 		const Surface* m_surface{};
 
-		VkPhysicalDeviceProperties m_properties{};	// TODO: not currently used
+		/**
+		 * Contains GPU supported properties
+		 */
+		VkPhysicalDeviceProperties m_properties{};	
 
-		VkPhysicalDeviceFeatures m_features{};		// TODO: not currently used
+		/**
+		 * Contains GPU supported features
+		 */
+		VkPhysicalDeviceFeatures m_features{};		
 
+		/**
+		 * Contains GPU supported memory properties
+		 */
 		VkPhysicalDeviceMemoryProperties m_memoryProperties{};
 
+		/**
+		 * Contains GPU supported MSAA sample count
+		 */
 		VkSampleCountFlagBits m_msaaSamples{};
 
+		/**
+		 * Contains indices of GPU queue families
+		 */
 		QueueFamilyIndices queueFamilyIndices{};
 
+		/**
+		 * Required extensions to look for when selecting a GPU
+		 */
 		const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 
+		/**
+		 * Struct containing swap chain support info
+		 */
 		SwapChainSupportDetails swapChainsSupportDetails{};
 
+		/**
+		 * Returns true if the provided GPU has all required features and properties
+		 */
 		bool isDeviceSuitable(VkPhysicalDevice device, VkSurfaceKHR surface);
 
+		/**
+		 * Find queue family indices of provided GPU
+		 */
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
+		/**
+		 * Returns true if provided GPU has required extensions
+		 */
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
 
+		/**
+		 * Returns swap chain support info of provided GPU
+		 */
 		SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface) const;
 	};
 }
