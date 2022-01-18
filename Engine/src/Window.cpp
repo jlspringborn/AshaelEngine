@@ -1,5 +1,7 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Window.h"
-
 
 namespace ash
 {

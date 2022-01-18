@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Vulkan/SwapChain.h"
 
 #include <cstdint>	// for UINT32_MAX

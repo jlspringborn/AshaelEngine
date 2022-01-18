@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Input.h"
 
 namespace ash

@@ -1,3 +1,5 @@
+// FRAGEMENT SHADER
+// Copyright (C) 2021, Jesse Springborn
 #version 450
 
 layout(location = 0) in vec3 fragColor;

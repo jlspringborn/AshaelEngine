@@ -1,3 +1,5 @@
+// VERTEX SHADER
+// Copyright (C) 2021, Jesse Springborn
 #version 450
 
 layout(binding = 0) uniform UniformBufferObject

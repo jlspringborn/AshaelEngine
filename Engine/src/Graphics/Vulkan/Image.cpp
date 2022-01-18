@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Vulkan/Image.h"
 
 #include <stdexcept>

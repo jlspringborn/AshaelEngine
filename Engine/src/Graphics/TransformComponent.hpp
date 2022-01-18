@@ -1,5 +1,5 @@
 /**
- * Contains transform information for game objects
+ * Manages transform data of 3D objects
  *
  * Copyright (C) 2021, Jesse Springborn
  */
@@ -16,23 +16,24 @@
 
 namespace ash
 {
+	/**
+	 * Manages transform data of 3D objects
+	 */
 	class TransformComponent
 	{
 	public:
 
-		void setTranslation(glm::vec3 translation)
-		{
-			m_translation = translation;
-		}
+		void setTranslation(glm::vec3 translation) { m_translation = translation; }
 
-		void setRotation(glm::vec3 rotation)
-		{
-			m_rotation = rotation;
-		}
+		void setScale(glm::vec3 scale) { m_scale = scale; }
 
-		glm::vec3 m_translation{};
-		glm::vec3 m_scale{ 1.f };
-		glm::vec3 m_rotation{};
+		void setRotation(glm::vec3 rotation) { m_rotation = rotation; }
+
+		glm::vec3 getTranslation() { return m_translation; }
+
+		glm::vec3 getScale() { return m_scale; }
+
+		glm::vec3 getRotation() { return m_rotation; }
 
 		glm::mat4 mat4()
 		{
@@ -62,10 +63,23 @@ namespace ash
 					0.0f,
 				},
 				{m_translation.x, m_translation.y, m_translation.z, 1.0f} };
-			//auto transform = glm::translate(glm::mat4{ 1.f }, m_translation);			// Adjust transform by objects translation
-			//transform = glm::eulerAngleYXZ(m_rotation.y, m_rotation.x, m_rotation.z);	// Adjust transform by objects rotation
-			//transform = glm::scale(transform, m_scale);									// Adjust transform by objects scale
-			//return transform;
 		}
+
+	private:
+
+		/**
+		 * Position of object in 3D space
+		 */
+		glm::vec3 m_translation{};
+
+		/**
+		 * Scale of object in 3D space
+		 */
+		glm::vec3 m_scale{ 1.f };
+
+		/**
+		 * Rotation of object in 3D space
+		 */
+		glm::vec3 m_rotation{};
 	};
 }

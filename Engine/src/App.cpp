@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "App.h"
 
 #include "GameObjects/GameObject.h"
@@ -59,7 +62,7 @@ namespace ash
 			m_cameraController->move(m_window.get(), frameTime, viewerObject);
 
 			// Set view direction
-			m_camera->setViewDirection(viewerObject->getTransform().m_translation, m_cameraController->getForwardDirection());
+			m_camera->setViewDirection(viewerObject->getTransform().getTranslation(), m_cameraController->getForwardDirection());
 
 			// Render provided game objects based on provided camera view and projection matrix info
 			m_graphics->renderGameObjects(m_gameObjects, m_camera.get());

@@ -121,19 +121,48 @@ namespace ash
 		std::vector<VkCommandBuffer> m_commandBuffers{};
 
 		/**
-		 * Vulkan Semaphore, used for sync
+		 * Vulkan Semaphores, waits to acquire a swap chain image until an image is available
+		 * GPU - GPU sync
 		 */
 		std::vector<VkSemaphore> m_imageAvailableSemaphores{};
+
+		/**
+		 * Vulkan Semaphores, signals that a render is finished
+		 * GPU - GPU sync
+		 */
 		std::vector<VkSemaphore> m_renderFinishedSemaphores{};
+
+		/**
+		 * Vulkan Fences, wait to submit draw call until frame is ready
+		 * GPU - CPU sync
+		 */
 		std::vector<VkFence> m_inFlightFences{};
+
+		/**
+		 * Vulkan Fences, wait for images to finish operations before using them
+		 * GPU - CPU sync
+		 */
 		std::vector<VkFence> m_imagesInFlight{};
 
+		/**
+		 * The maximum number of images that can be in flight at any given time
+		 */
 		const int m_maxFramesInFlight{ 2 };
 
+		/**
+		 * Used for sync operations
+		 */
 		size_t m_currentFrame = 0;
 
+		/**
+		 * Vulkan Descriptor Set Layout, used to tell shaders what kind of data
+		 * to expect from uniform buffers & push constants
+		 */
 		VkDescriptorSetLayout m_descriptorSetLayout{};
 
+		/**
+		 * Vulkan Sampler, samples image textures for displaying textures to models
+		 */
 		VkSampler m_textureSampler{};
 
 		/**
@@ -141,34 +170,85 @@ namespace ash
 		 */
 		std::vector<std::unique_ptr<Buffer>> m_uniformBuffers;
 
+		/**
+		 * Creates Vulkan Command buffers, called during swap chain recreation
+		 */
 		void createCommandBuffers();
 
+		/**
+		 * Create semaphores and fences
+		 * Calling during swap chain recreation will produce error
+		 * TODO: look into this
+		 */
 		void createSyncObjects();
 
+		/**
+		 * Initiates the Vulkan Render Pass, start render pass for binding and 
+		 * draw call recording
+		 */
 		void startRenderPass(VkFramebuffer framebuffer, VkCommandBuffer commandBuffer);
 
+		/**
+		 * Ends the Vulkan Render Pass, stops recording of binding and draw calls
+		 * for the current frame
+		 */
 		void endRenderPass(VkCommandBuffer commandBuffer);
 
+		/**
+		 * Cleans up swap chain, gameObjects are needed since descriptor sets are
+		 * linked to the swap chain image count
+		 */
 		void cleanupSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects);
 
+		/**
+		 * Recreates Vulkan Swap Chain, gameObjects are needed since descriptor sets are
+		 * linked to the swap chain image count
+		 */
 		void recreateSwapChain(std::vector<std::unique_ptr<GameObject>>& gameObjects);
 
+		/**
+		 * Called during swap chain recreation and when class is destroyed
+		 */
 		void cleanupCommandBuffers();
 
+		/**
+		 * Called in destructor
+		 */
 		void cleanupSyncObjects();
 
+		/**
+		 * Called in constructor
+		 */
 		void createDescriptorSetLayout();
 
+		/**
+		 * Called in destructor
+		 */
 		void cleanupDescriptorSetLayout();
 
+		/**
+		 * Called in constructor
+		 */
 		void createTextureSampler();
 
+		/**
+		 * Called in destructor
+		 */
 		void cleanupTextureSampler();
 
+		/**
+		 * Called in constructor
+		 */
 		void createDepthResources();
 
+		/**
+		 * Called in destructor
+		 */
 		void cleanupDepthResource();
 
+		/**
+		 * True if provided format is compatible with a stencil component
+		 */
 		bool hasStencilComponent(VkFormat format);
 
 		/**
@@ -186,9 +266,5 @@ namespace ash
 		 * Updates uniform buffers with new transform data
 		 */
 		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent,Camera* camera);
-
-
-
-
 	};
 }

@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Vulkan\Instance.h"
 
 #include "Vulkan\DebugMessenger.h"	// for instance creation debugging

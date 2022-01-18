@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Camera/CameraController.h"
 
 #include <limits>
@@ -38,7 +41,8 @@ namespace ash
 		// Move if any movement keys were pressed
 		if (glm::dot(moveDirection, moveDirection) > std::numeric_limits<float>::epsilon())
 		{
-			gameObject->getTransform().m_translation += m_lookSpeed * deltaTime * glm::normalize(moveDirection);
+			gameObject->getTransform().setTranslation(
+				gameObject->getTransform().getTranslation() + m_lookSpeed * deltaTime * glm::normalize(moveDirection));
 		}
 	}
 

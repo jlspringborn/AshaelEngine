@@ -14,7 +14,6 @@
 int main()
 {
 	std::unique_ptr<ash::App> app = std::make_unique<ash::App>();
-	
 
 	try
 	{

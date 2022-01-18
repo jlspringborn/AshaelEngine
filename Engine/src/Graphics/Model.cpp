@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #include "Model.h"
 
 #include "Vulkan/UniformBufferObject.hpp"
@@ -40,7 +43,7 @@ namespace ash
 	{
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[index], 0, nullptr);
+		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
 		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
@@ -116,8 +119,8 @@ namespace ash
 		allociInfo.descriptorSetCount = swapChainImageCount;
 		allociInfo.pSetLayouts = layouts.data();
 
-		descriptorSets.resize(swapChainImageCount);
-		if (vkAllocateDescriptorSets(*m_logicalDevice, &allociInfo, descriptorSets.data()) != VK_SUCCESS)
+		m_descriptorSets.resize(swapChainImageCount);
+		if (vkAllocateDescriptorSets(*m_logicalDevice, &allociInfo, m_descriptorSets.data()) != VK_SUCCESS)
 		{
 			throw std::runtime_error("railed to allocate descriptor sets!");
 		}
@@ -138,7 +141,7 @@ namespace ash
 
 			// uniform buffer
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[0].dstSet = descriptorSets[i];
+			descriptorWrites[0].dstSet = m_descriptorSets[i];
 			descriptorWrites[0].dstBinding = 0;
 			descriptorWrites[0].dstArrayElement = 0;
 			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -147,7 +150,7 @@ namespace ash
 
 			// image sampler
 			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[1].dstSet = descriptorSets[i];
+			descriptorWrites[1].dstSet = m_descriptorSets[i];
 			descriptorWrites[1].dstBinding = 1;
 			descriptorWrites[1].dstArrayElement = 0;
 			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
@@ -161,9 +164,9 @@ namespace ash
 
 	void Model::cleanupDescriptorSets()
 	{
-		for (size_t i = 0; i < descriptorSets.size(); i++)
+		for (size_t i = 0; i < m_descriptorSets.size(); i++)
 		{
-			descriptorSets[i] = nullptr;
+			m_descriptorSets[i] = nullptr;
 		}
 	}
 

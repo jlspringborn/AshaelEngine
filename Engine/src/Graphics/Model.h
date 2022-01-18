@@ -23,10 +23,9 @@
 
 namespace ash
 {
-
-	// TODO: Move this to another script
-
-
+	/**
+	 * Drawable 3D object
+	 */
 	class Model
 	{
 	public:
@@ -69,9 +68,10 @@ namespace ash
 		 */
 		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
 
+		/**
+		 * Called during swap chain recreation and class destruction
+		 */
 		void cleanupDescriptorSets();
-
-		const std::vector<VkDescriptorSet>& getDescriptorSets() const { return descriptorSets; }
 
 	private:
 
@@ -103,8 +103,11 @@ namespace ash
 		/**
 		 * Array of Descriptor Sets, one for each Uniform Buffer
 		 */
-		std::vector<VkDescriptorSet> descriptorSets{};
+		std::vector<VkDescriptorSet> m_descriptorSets{};
 
+		/**
+		 * Texture to be displayed on geometry during fragment stage of pipeline
+		 */
 		std::unique_ptr<Image> m_texture{};
 
 	};

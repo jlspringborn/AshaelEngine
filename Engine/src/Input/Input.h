@@ -1,3 +1,8 @@
+/**
+ * Handles GLFW Input events
+ *
+ * Copyright (C) 2022, Jesse Springborn
+ */
 #pragma once
 
 #define GLFW_INCLUDE_VULKAN
@@ -12,7 +17,7 @@ namespace ash
 		~Input();
 
 		/**
-		 * @brief poll input events using glfw
+		 * Poll input events using glfw
 		 */
 		void update();
 

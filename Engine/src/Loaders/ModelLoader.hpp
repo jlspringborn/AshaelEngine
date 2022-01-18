@@ -1,3 +1,8 @@
+/**
+ * Helper functions for loading in 3D models
+ *
+ * Copyright (C) 2021, Jesse Springborn
+ */
 #pragma once
 
 #include "Vulkan/Vertex.hpp"
@@ -12,6 +17,9 @@
 
 namespace ash
 {
+	/**
+	 * Load model from obj file
+	 */
 	void loadModel(std::string modelPath, std::vector<Vertex>& outVertices, std::vector<uint32_t>& outIndices)
 	{
 		tinyobj::attrib_t attrib;

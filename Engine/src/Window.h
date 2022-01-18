@@ -1,5 +1,5 @@
 /**
- * Manages system window
+ * Wrapper for GLFW Window
  *
  * Copyright (C) 2021, Jesse Springborn
  */
@@ -12,6 +12,9 @@
 
 namespace ash
 {
+	/**
+	 * Wrapper for GLFW Window
+	 */
 	class Window
 	{
 	public:
@@ -19,47 +22,72 @@ namespace ash
 		~Window();
 
 		/**
-		 * @brief checks if close button was pressed
+		 * Checks if close button was pressed
 		 */
 		bool shouldClose() const { return glfwWindowShouldClose(m_window); }
 
+		/**
+		 * Sets application to close during next loop iteration
+		 */
 		void closeWindow() { glfwSetWindowShouldClose(m_window, GLFW_TRUE); }
 
+		/**
+		 * Returns the GLFWwindow pointer
+		 */
 		GLFWwindow* getWindow() const { return m_window; }
 
+		/**
+		 * Returns current window dimensions
+		 */
 		const VkExtent2D getWindowExtent() const;
 
+		/**
+		 * Used for window resized callback
+		 */
 		const bool getWasWindowResized() const { return wasWindowResized; }
 
+		/**
+		 * Used for window resized callback
+		 */
 		void resetWasWindowResized();
 
+		/**
+		 * Mouse coordinates
+		 */
 		float lastX{};
-
 		float lastY{};
-
-		float xoffset{};
-
-		float yoffset{};
-
 		float yaw{};
-
 		float pitch{};
 
+		/**
+		 * Prevents jumping during initial mouse movement
+		 */
 		bool firstMouse{ true };
 
 	private:
 
-		// glfw window
+		/**
+		 * GLFW window
+		 */
 		GLFWwindow* m_window{};	
 
+		/**
+		 * Used for window resized callback
+		 */
 		bool wasWindowResized{ false };
 
+		/**
+		 * Called from GLFW when the window gets resized
+		 */
 		static void framebufferResizedCallback(GLFWwindow* window, int width, int height)
 		{
 			auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
 			appWindow->wasWindowResized = true;
 		}
 
+		/**
+		 * Called from GLFW when mouse input is detected
+		 */
 		static void mouseCallback(GLFWwindow* window, double xpos, double ypos)
 		{
 			auto appWindow = reinterpret_cast<Window*>(glfwGetWindowUserPointer(window));
