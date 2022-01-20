@@ -52,6 +52,5 @@ namespace ash
 		 * Memory used by Vulkan Buffer
 		 */
 		VkDeviceMemory m_bufferMemory{};
-
 	};
 }
