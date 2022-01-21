@@ -75,14 +75,14 @@ namespace ash
 	void App::loadGameObjects()
 	{
 		std::unique_ptr<GameObject> gameObject = 
-			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room_adjusted.obj", "textures/viking_room.png"));
+			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room.gltf", "textures/viking_room.png"));
 		//gameObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, 0.0f, 20.f });
 		m_gameObjects.push_back(std::move(gameObject));
 
-		std::unique_ptr<GameObject> gameObject2 =
+		/*std::unique_ptr<GameObject> gameObject2 =
 			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room_adjusted.obj", "textures/viking_room.png"));
 		gameObject2->getTransform().setTranslation(glm::vec3{ -1.5f, 0.0f, 0.f });
-		m_gameObjects.push_back(std::move(gameObject2));
+		m_gameObjects.push_back(std::move(gameObject2));*/
 
 	}
 }

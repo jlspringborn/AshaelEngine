@@ -87,9 +87,6 @@
     <ClInclude Include="src\Camera\CameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Model\GLTFModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\App.cpp">
@@ -147,9 +144,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Camera\CameraController.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Model\GLTFModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -13,7 +13,6 @@
 #include "Vulkan/PushConstantData.hpp"
 #include "TransformComponent.hpp"
 
-
 #include <vulkan/vulkan.h>
 
 #include <chrono>
@@ -23,6 +22,30 @@
 
 namespace ash
 {
+	struct Node;
+
+	// A Primitive contains the data for a single draw call
+	struct Primitive
+	{
+		uint32_t firstIndex;
+		uint32_t indexCount;
+		int32_t materialIndex;
+	};
+
+	// Contains the node's (optional) geometry and can be made up of an arbitrary number of primitives
+	struct Mesh
+	{
+		std::vector<Primitive> primitives;
+	};
+
+	struct Node
+	{
+		Node* parent;
+		std::vector<Node> children;
+		Mesh mesh;
+		glm::mat4 matrix;
+	};
+
 	/**
 	 * Drawable 3D object
 	 */
@@ -73,6 +96,15 @@ namespace ash
 		 */
 		void cleanupDescriptorSets();
 
+		std::vector<Node>& getNodes() { return nodes; }
+
+		std::vector<Vertex>& getVertices() { return m_vertices; }
+
+		std::vector<uint32_t>& getIndices() { return m_indices; }
+
+		// Draw a single node including child nodes (if present)
+		void drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node);
+
 	private:
 
 		/**
@@ -109,6 +141,10 @@ namespace ash
 		 * Texture to be displayed on geometry during fragment stage of pipeline
 		 */
 		std::unique_ptr<Image> m_texture{};
+
+
+		std::vector<Node> nodes;
+
 
 	};
 }

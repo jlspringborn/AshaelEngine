@@ -1,15 +1,16 @@
 /**
  * Copyright (C) 2021, Jesse Springborn
  */
+
 #include "Model.h"
 
+#include "Loaders/ModelLoader.hpp"
 #include "Vulkan/UniformBufferObject.hpp"
 #include "Vulkan/PushConstantData.hpp"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
+//#define STB_IMAGE_IMPLEMENTATION
+//#include <stb_image.h>
 
-#include "Loaders/ModelLoader.hpp"
 
 #include <stdexcept>
 
@@ -28,7 +29,9 @@ namespace ash
 		m_logicalDevice{ logicalDevice }
 	{
 		createTexture(physicalDevice, texturePath);
-		loadModel(modelPath, m_vertices, m_indices);
+		loadglTFFile(modelPath, *this);
+		std::cout << "Vertices count: " << m_vertices.size() << '\n';
+		//loadModel(modelPath, m_vertices, m_indices);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
 		//createUniformBuffers(physicalDevice, swapChainImageCount);
@@ -44,16 +47,25 @@ namespace ash
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
-		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		//vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		//vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
 		PushConstantData push{};
 		auto newTransform = transform->mat4();
 		push.transform = transform->mat4();
 
 		vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(PushConstantData), &push);
+		/*
+		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);*/
 
-		vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(m_indices.size()), 1, 0, 0, 0);
+		// All vertices and indices are stored in single buffers, so we only need to bind once
+
+		vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
+		// Render all nodes at top-level
+		for (auto& node : nodes) {
+			drawNode(commandBuffer, pipelineLayout, node);
+		}
 	}
 
 	void Model::createVertexBuffer(const PhysicalDevice* physicalDevice)
@@ -167,6 +179,35 @@ namespace ash
 		for (size_t i = 0; i < m_descriptorSets.size(); i++)
 		{
 			m_descriptorSets[i] = nullptr;
+		}
+	}
+
+	void Model::drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node)
+	{
+		if (node.mesh.primitives.size() > 0) {
+			// Pass the node's matrix via push constants
+			// Traverse the node hierarchy to the top-most parent to get the final matrix of the current node
+			glm::mat4 nodeMatrix = node.matrix;
+			Node* currentParent = node.parent;
+			while (currentParent) {
+				nodeMatrix = currentParent->matrix * nodeMatrix;
+				currentParent = currentParent->parent;
+			}
+			// Pass the final matrix to the vertex shader using push constants
+			//vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(glm::mat4), &nodeMatrix);
+			for (Primitive& primitive : node.mesh.primitives) {
+				if (primitive.indexCount > 0) {
+					// Get the texture index for this primitive
+					//Texture texture = textures[materials[primitive.materialIndex].baseColorTextureIndex];
+					// Bind the descriptor for the current primitive's texture
+					//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &images[texture.imageIndex].descriptorSet, 0, nullptr);
+					//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
+					vkCmdDrawIndexed(commandBuffer, primitive.indexCount, 1, primitive.firstIndex, 0, 0);
+				}
+			}
+		}
+		for (auto& child : node.children) {
+			drawNode(commandBuffer, pipelineLayout, child);
 		}
 	}
 
