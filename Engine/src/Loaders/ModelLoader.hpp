@@ -6,6 +6,7 @@
 #pragma once
 
 #include "Model/Model.h"
+#include "Graphics/Vulkan/Buffer.h"
 #include "Vulkan/PhysicalDevice.h"
 #include "Vulkan/LogicalDevice.h"
 #include "Vulkan/Vertex.hpp"
@@ -34,6 +35,93 @@
 
 namespace ash
 {
+	void loadTextures(tinygltf::Model& input, Model& model)
+	{
+		model.getTextures().resize(input.textures.size());
+		for (size_t i = 0; i < input.textures.size(); i++) {
+			model.getTextures()[i].imageIndex = input.textures[i].source;
+		}
+	}
+
+	void loadMaterials(tinygltf::Model& input, Model& model)
+	{
+		model.getMaterials().resize(input.materials.size());
+		for (size_t i = 0; i < input.materials.size(); i++) {
+			// We only read the most basic properties required for our sample
+			tinygltf::Material glTFMaterial = input.materials[i];
+			// Get the base color factor
+			if (glTFMaterial.values.find("baseColorFactor") != glTFMaterial.values.end()) {
+				model.getMaterials()[i].baseColorFactor = glm::make_vec4(glTFMaterial.values["baseColorFactor"].ColorFactor().data());
+			}
+			// Get base color texture index
+			if (glTFMaterial.values.find("baseColorTexture") != glTFMaterial.values.end()) {
+				model.getMaterials()[i].baseColorTextureIndex = glTFMaterial.values["baseColorTexture"].TextureIndex();
+			}
+		}
+	}
+
+	void loadImages(tinygltf::Model& input, Model& model, const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice)
+	{
+		// Images can be stored inside the glTF (which is the case for the sample model), so instead of directly
+		// loading them from disk, we fetch them from the glTF loader and upload the buffers
+		model.getTextureImages().resize(input.images.size());
+		for (size_t i = 0; i < input.images.size(); i++) {
+			tinygltf::Image& glTFImage = input.images[i];
+			// Get the image data from the glTF loader
+			unsigned char* buffer = nullptr;
+			VkDeviceSize bufferSize = 0;
+			bool deleteBuffer = false;
+			// We convert RGB-only images to RGBA, as most devices don't support RGB-formats in Vulkan
+			if (glTFImage.component == 3) {
+				bufferSize = glTFImage.width * glTFImage.height * 4;
+				buffer = new unsigned char[bufferSize];
+				unsigned char* rgba = buffer;
+				unsigned char* rgb = &glTFImage.image[0];
+				for (size_t i = 0; i < glTFImage.width * glTFImage.height; ++i) {
+					memcpy(rgba, rgb, sizeof(unsigned char) * 3);
+					rgba += 4;
+					rgb += 3;
+				}
+				deleteBuffer = true;
+			}
+			else {
+				buffer = &glTFImage.image[0];
+				bufferSize = glTFImage.image.size();
+			}
+
+			std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
+			logicalDevice,
+			physicalDevice,
+			bufferSize,
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
+
+			void* data;
+			vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
+			memcpy(data, buffer, static_cast<size_t>(bufferSize));
+			vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
+
+			model.getTextureImages()[i].texture = std::make_unique<Image>(
+				logicalDevice,
+				physicalDevice,
+				glTFImage.width,
+				glTFImage.height,
+				VK_FORMAT_R8G8B8A8_SRGB, 
+				VK_IMAGE_TILING_OPTIMAL,
+				VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+				VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+				VK_IMAGE_ASPECT_COLOR_BIT);
+
+			model.getTextureImages()[i].texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			model.getTextureImages()[i].texture->copyFromBuffer(*stagingBuffer, static_cast<uint32_t>(glTFImage.width), static_cast<uint32_t>(glTFImage.height));
+			model.getTextureImages()[i].texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+			
+			if (deleteBuffer) 
+			{
+				delete[] buffer;
+			}
+		}
+	}
 
 	void loadNode(const tinygltf::Node& inputNode, 
 		const tinygltf::Model& input, 
@@ -168,7 +256,7 @@ namespace ash
 		}
 	}
 
-	void loadglTFFile(std::string filename, Model& model)
+	void loadglTFFile(std::string filename, Model& model, const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice)
 	{
 		tinygltf::Model glTFInput;
 		tinygltf::TinyGLTF gltfContext;
@@ -177,9 +265,9 @@ namespace ash
 		bool fileLoaded = gltfContext.LoadASCIIFromFile(&glTFInput, &error, &warning, filename);
 
 		if (fileLoaded) {
-			//glTFModel.loadImages(glTFInput);
-			//glTFModel.loadMaterials(glTFInput);
-			//glTFModel.loadTextures(glTFInput);
+			loadImages(glTFInput, model, logicalDevice, physicalDevice);
+			loadMaterials(glTFInput, model);
+			loadTextures(glTFInput, model);
 			const tinygltf::Scene& scene = glTFInput.scenes[0];
 			for (size_t i = 0; i < scene.nodes.size(); i++) {
 				const tinygltf::Node node = glTFInput.nodes[scene.nodes[i]];

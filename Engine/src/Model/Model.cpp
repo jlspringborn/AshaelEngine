@@ -29,13 +29,17 @@ namespace ash
 		m_logicalDevice{ logicalDevice }
 	{
 		createTexture(physicalDevice, texturePath);
-		loadglTFFile(modelPath, *this);
+		loadglTFFile(modelPath, *this, logicalDevice, physicalDevice);
 		std::cout << "Vertices count: " << m_vertices.size() << '\n';
 		//loadModel(modelPath, m_vertices, m_indices);
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
 		//createUniformBuffers(physicalDevice, swapChainImageCount);
 		createDescriptorSets(swapChainImageCount, setLayout, pool, sampler, uniformBuffers);
+
+		std::cout << "Image count: " << m_textureImages.size() << '\n';
+		std::cout << "Texture count: " << m_textures.size() << '\n';
+		std::cout << "Material count: " << m_materials.size() << '\n';
 	}
 
 	Model::~Model()
