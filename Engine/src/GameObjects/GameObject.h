@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include "Model.h"
+#include "Model/Model.h"
 #include "TransformComponent.hpp"
 
 #include <memory>

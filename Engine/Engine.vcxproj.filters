@@ -54,7 +54,7 @@
     <ClInclude Include="src\GameObjects\GameObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\Model.h">
+    <ClInclude Include="src\Model\Model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Graphics\Vulkan\DescriptorPool.h">
@@ -87,7 +87,7 @@
     <ClInclude Include="src\Camera\CameraController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Graphics\GLTFModel.h">
+    <ClInclude Include="src\Model\GLTFModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -131,7 +131,7 @@
     <ClCompile Include="src\GameObjects\GameObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\Model.cpp">
+    <ClCompile Include="src\Model\Model.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Graphics\Vulkan\DescriptorPool.cpp">
@@ -149,7 +149,7 @@
     <ClCompile Include="src\Camera\CameraController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Graphics\GLTFModel.cpp">
+    <ClCompile Include="src\Model\GLTFModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

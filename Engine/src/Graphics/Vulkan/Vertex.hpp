@@ -22,8 +22,9 @@ namespace ash
 	struct Vertex
 	{
 		glm::vec3 pos;		// Position
+		glm::vec3 normal;
+		glm::vec2 uv;		// Texture coordinate
 		glm::vec3 color;	// Vertex color
-		glm::vec2 texCoord;	// Texture coordinate
 
 		static VkVertexInputBindingDescription getBindingDescription()
 		{
@@ -34,9 +35,9 @@ namespace ash
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 3> getAttributeDescriptions()
+		static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions()
 		{
-			std::array<VkVertexInputAttributeDescription, 3> attributeDescriptions{};
+			std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
 
 			// position
 			attributeDescriptions[0].binding	= 0;
@@ -44,17 +45,23 @@ namespace ash
 			attributeDescriptions[0].format		= VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[0].offset		= offsetof(Vertex, pos);
 
-			// color
+			// normal
 			attributeDescriptions[1].binding	= 0;
 			attributeDescriptions[1].location	= 1;
 			attributeDescriptions[1].format		= VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset		= offsetof(Vertex, color);
+			attributeDescriptions[1].offset		= offsetof(Vertex, normal);
 
-			// texture coordinate
+			// uv
 			attributeDescriptions[2].binding	= 0;
 			attributeDescriptions[2].location	= 2;
 			attributeDescriptions[2].format		= VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[2].offset		= offsetof(Vertex, texCoord);
+			attributeDescriptions[2].offset		= offsetof(Vertex, uv);
+
+			// color
+			attributeDescriptions[3].binding	= 0;
+			attributeDescriptions[3].location	= 3;
+			attributeDescriptions[3].format		= VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[3].offset		= offsetof(Vertex, color);
 
 			return attributeDescriptions;
 		}
@@ -64,7 +71,7 @@ namespace ash
 		 */
 		bool operator==(const Vertex& other) const
 		{
-			return pos == other.pos && color == other.color && texCoord == other.texCoord;
+			return pos == other.pos && normal == other.normal  && uv== other.uv && color == other.color;
 		}
 	};
 }
@@ -75,7 +82,7 @@ namespace std
 	{
 		size_t operator()(ash::Vertex const& vertex) const 
 		{
-			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1) ^ (hash<glm::vec2>()(vertex.texCoord) << 1);
+			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.normal)  ^ (hash<glm::vec2>()(vertex.uv) << 1) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1));
 		}
 	};
 }
