@@ -124,6 +124,8 @@ namespace ash
 		// Draw a single node including child nodes (if present)
 		void drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node);
 
+		void createDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout layout, VkSampler sampler);
+
 	private:
 
 		/**

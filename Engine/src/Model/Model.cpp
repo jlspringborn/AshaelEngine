@@ -141,10 +141,9 @@ namespace ash
 			for (Primitive& primitive : node.mesh.primitives) {
 				if (primitive.indexCount > 0) {
 					// Get the texture index for this primitive
-					//Texture texture = textures[materials[primitive.materialIndex].baseColorTextureIndex];
+					Texture texture = m_textures[m_materials[primitive.materialIndex].baseColorTextureIndex];
 					// Bind the descriptor for the current primitive's texture
-					//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &images[texture.imageIndex].descriptorSet, 0, nullptr);
-					//vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
+					vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 1, 1, &m_textureImages[texture.imageIndex].descriptorSet, 0, nullptr);
 					vkCmdDrawIndexed(commandBuffer, primitive.indexCount, 1, primitive.firstIndex, 0, 0);
 				}
 			}
@@ -152,6 +151,42 @@ namespace ash
 		for (auto& child : node.children) {
 			drawNode(commandBuffer, pipelineLayout, child);
 		}
+	}
+
+	void Model::createDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout layout, VkSampler sampler)
+	{
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = pool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &layout;
+
+		for (auto& image : m_textureImages)
+		{
+			if (vkAllocateDescriptorSets(*m_logicalDevice, &allocInfo, &image.descriptorSet) != VK_SUCCESS)
+			{
+				throw std::runtime_error("railed to allocate descriptor sets!");
+			}
+
+			VkDescriptorImageInfo imageInfo{};
+			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			imageInfo.imageView = *image.texture;	// * returns image view
+			imageInfo.sampler = sampler;
+
+			std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
+
+			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			descriptorWrites[0].dstSet = image.descriptorSet;
+			descriptorWrites[0].dstBinding = 0;
+			descriptorWrites[0].dstArrayElement = 0;
+			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			descriptorWrites[0].descriptorCount = 1;
+			descriptorWrites[0].pImageInfo = &imageInfo;
+
+			vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		}
+
+
 	}
 
 	void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)
