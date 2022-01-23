@@ -28,7 +28,7 @@ namespace ash
 		std::string texturePath) :
 		m_logicalDevice{ logicalDevice }
 	{
-		createTexture(physicalDevice, texturePath);
+		//createTexture(physicalDevice, texturePath);
 		loadglTFFile(modelPath, *this, logicalDevice, physicalDevice);
 		std::cout << "Vertices count: " << m_vertices.size() << '\n';
 		//loadModel(modelPath, m_vertices, m_indices);
@@ -150,7 +150,7 @@ namespace ash
 
 			VkDescriptorImageInfo imageInfo{};
 			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = *m_texture;	// * returns image view
+			imageInfo.imageView = *m_textureImages[0].texture;	// * returns image view
 			imageInfo.sampler = sampler;
 
 			std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
