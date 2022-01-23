@@ -38,7 +38,7 @@ namespace ash
 
 		// Create the viewer object which will contain the camera's position and rotation
 		auto viewerObject = new GameObject();
-		viewerObject->getTransform().setTranslation(glm::vec3{ 0.0f, -.5f, -2.5f });
+		viewerObject->getTransform().setTranslation(glm::vec3{ 0.0f, -0.5f, 0.0f });
 
 		while (!m_window->shouldClose())
 		{
@@ -76,7 +76,8 @@ namespace ash
 	{
 		std::unique_ptr<GameObject> gameObject = 
 			std::make_unique<GameObject>(m_graphics->generateModel("models/viking_room.gltf", "textures/viking_room.png"));
-		//gameObject->m_transformComponent.setTranslation(glm::vec3{ 0.0f, 0.0f, 20.f });
+		gameObject->getTransform().setTranslation(glm::vec3{ -2.0f, 0.0f, 0.f });
+		gameObject->getTransform().setRotation(glm::vec3{ 0.0f, 150.0f, 0.f });
 		m_gameObjects.push_back(std::move(gameObject));
 
 		/*std::unique_ptr<GameObject> gameObject2 =
