@@ -54,6 +54,16 @@ namespace ash
 		 */
 		float getAspectRatio() const { return m_swapChain->getAspectRatio(); }
 
+		/**
+		 * Creates a descriptor set for each swap chain image
+		 */
+		void createDescriptorSets(std::vector<std::unique_ptr<GameObject>>& gameObjects);
+
+		/**
+		 * Called during swap chain recreation and class destruction
+		 */
+		void cleanupDescriptorSets();
+
 	private:
 
 		/**
@@ -266,5 +276,12 @@ namespace ash
 		 * Updates uniform buffers with new transform data
 		 */
 		void updateUniformBuffer(uint32_t currentImage, VkExtent2D extent,Camera* camera);
+
+		/**
+		 * Array of Descriptor Sets, one for each Uniform Buffer
+		 */
+		std::vector<VkDescriptorSet> m_descriptorSets{};
+
+		
 	};
 }

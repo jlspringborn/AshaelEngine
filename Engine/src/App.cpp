@@ -33,7 +33,7 @@ namespace ash
 	{
 		// TODO: load from scene file
 		loadGameObjects();
-
+		m_graphics->createDescriptorSets(m_gameObjects);
 		auto currentTime = std::chrono::high_resolution_clock::now();
 
 		// Create the viewer object which will contain the camera's position and rotation

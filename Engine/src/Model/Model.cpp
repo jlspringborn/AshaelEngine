@@ -35,7 +35,6 @@ namespace ash
 		createVertexBuffer(physicalDevice);
 		createIndexBuffer(physicalDevice);
 		//createUniformBuffers(physicalDevice, swapChainImageCount);
-		createDescriptorSets(swapChainImageCount, setLayout, pool, sampler, uniformBuffers);
 
 		std::cout << "Image count: " << m_textureImages.size() << '\n';
 		std::cout << "Texture count: " << m_textures.size() << '\n';
@@ -50,7 +49,7 @@ namespace ash
 	{
 		VkBuffer vertexBuffers[] = { *m_vertexBuffer };
 		VkDeviceSize offsets[] = { 0 };
-		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &m_descriptorSets[index], 0, nullptr);
+		
 		//vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
 		//vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 
@@ -125,66 +124,6 @@ namespace ash
 		m_indexBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
 	}
 
-	void Model::createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers)
-	{
-		std::vector<VkDescriptorSetLayout> layouts(swapChainImageCount, setLayout);
-
-		VkDescriptorSetAllocateInfo allociInfo{};
-		allociInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-		allociInfo.descriptorPool = pool;
-		allociInfo.descriptorSetCount = swapChainImageCount;
-		allociInfo.pSetLayouts = layouts.data();
-
-		m_descriptorSets.resize(swapChainImageCount);
-		if (vkAllocateDescriptorSets(*m_logicalDevice, &allociInfo, m_descriptorSets.data()) != VK_SUCCESS)
-		{
-			throw std::runtime_error("railed to allocate descriptor sets!");
-		}
-
-		for (size_t i = 0; i < swapChainImageCount; i++)
-		{
-			VkDescriptorBufferInfo bufferInfo{};
-			bufferInfo.buffer = *uniformBuffers[i];
-			bufferInfo.offset = 0;
-			bufferInfo.range = sizeof(UniformBufferObject);
-
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = *m_textureImages[0].texture;	// * returns image view
-			imageInfo.sampler = sampler;
-
-			std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
-
-			// uniform buffer
-			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[0].dstSet = m_descriptorSets[i];
-			descriptorWrites[0].dstBinding = 0;
-			descriptorWrites[0].dstArrayElement = 0;
-			descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-			descriptorWrites[0].descriptorCount = 1;
-			descriptorWrites[0].pBufferInfo = &bufferInfo;
-
-			// image sampler
-			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			descriptorWrites[1].dstSet = m_descriptorSets[i];
-			descriptorWrites[1].dstBinding = 1;
-			descriptorWrites[1].dstArrayElement = 0;
-			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			descriptorWrites[1].descriptorCount = 1;
-			descriptorWrites[1].pImageInfo = &imageInfo;
-			
-
-			vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
-		}
-	}
-
-	void Model::cleanupDescriptorSets()
-	{
-		for (size_t i = 0; i < m_descriptorSets.size(); i++)
-		{
-			m_descriptorSets[i] = nullptr;
-		}
-	}
 
 	void Model::drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node)
 	{

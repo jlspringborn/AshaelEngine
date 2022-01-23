@@ -109,16 +109,6 @@ namespace ash
 		 */
 		void createTexture(const PhysicalDevice* physicalDevice, std::string texturePath);
 
-		/**
-		 * Creates a descriptor set for each swap chain image
-		 */
-		void createDescriptorSets(const uint32_t swapChainImageCount, VkDescriptorSetLayout setLayout, VkDescriptorPool pool, VkSampler sampler, std::vector<std::unique_ptr<Buffer>>& uniformBuffers);
-
-		/**
-		 * Called during swap chain recreation and class destruction
-		 */
-		void cleanupDescriptorSets();
-
 		std::vector<Node>& getNodes() { return nodes; }
 
 		std::vector<Vertex>& getVertices() { return m_vertices; }
@@ -160,11 +150,6 @@ namespace ash
 		 * Buffer to hold index of vertices
 		 */
 		std::unique_ptr<Buffer> m_indexBuffer;
-
-		/**
-		 * Array of Descriptor Sets, one for each Uniform Buffer
-		 */
-		std::vector<VkDescriptorSet> m_descriptorSets{};
 
 		/**
 		 * Texture to be displayed on geometry during fragment stage of pipeline
