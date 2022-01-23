@@ -11,10 +11,11 @@
 
 namespace ash
 {
-	GraphicsPipeline::GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout) :
+	GraphicsPipeline::GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, const RenderPass* renderPass, 
+		std::vector<VkDescriptorSetLayout>& layouts) :
 		m_logicalDevice{ logicalDevice }
 	{
-		createPipeline(swapChain, renderPass, layout);
+		createPipeline(swapChain, renderPass, layouts);
 	}
 
 	GraphicsPipeline::~GraphicsPipeline()
@@ -28,7 +29,7 @@ namespace ash
 		vkDestroyPipelineLayout(*m_logicalDevice, m_pipelineLayout, nullptr);
 	}
 
-	void GraphicsPipeline::createPipeline(const SwapChain* swapChain, const RenderPass* renderPass, const VkDescriptorSetLayout& layout)
+	void GraphicsPipeline::createPipeline(const SwapChain* swapChain, const RenderPass* renderPass, std::vector<VkDescriptorSetLayout>& layouts)
 	{
 		// get shader code from files
 		auto vertShaderCode = readFile("shaders/vert.spv");
@@ -154,8 +155,8 @@ namespace ash
 		// pipeline layout
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType					= VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount			= 1;
-		pipelineLayoutInfo.pSetLayouts				= &layout;
+		pipelineLayoutInfo.setLayoutCount			= layouts.size();
+		pipelineLayoutInfo.pSetLayouts				= layouts.data();
 		pipelineLayoutInfo.pushConstantRangeCount	= 1;
 		pipelineLayoutInfo.pPushConstantRanges		= &pushConstantRange;
 

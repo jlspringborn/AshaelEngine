@@ -59,6 +59,7 @@ namespace ash
 		 */
 		void createDescriptorSets(std::vector<std::unique_ptr<GameObject>>& gameObjects);
 
+
 		/**
 		 * Called during swap chain recreation and class destruction
 		 */
@@ -282,6 +283,11 @@ namespace ash
 		 */
 		std::vector<VkDescriptorSet> m_descriptorSets{};
 
+		VkDescriptorSetLayout m_uboLayout{};
+
+		VkDescriptorSetLayout m_textureLayout{};
+
+		std::vector<VkDescriptorSetLayout> m_layouts{};
 		
 	};
 }

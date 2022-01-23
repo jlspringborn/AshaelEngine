@@ -22,7 +22,7 @@ namespace ash
 	{
 	public:
 		GraphicsPipeline(const LogicalDevice* logicalDevice, const SwapChain* swapChain, 
-			const RenderPass* renderPass, const VkDescriptorSetLayout& layout);
+			const RenderPass* renderPass, std::vector<VkDescriptorSetLayout>& layouts);
 		~GraphicsPipeline();
 
 		/**
@@ -38,8 +38,9 @@ namespace ash
 		/**
 		 * Creates a Vulkan Graphics Pipeline, called during swap chain recreation
 		 */
-		void createPipeline(const SwapChain* swapChain, const RenderPass* renderPass,
-			const VkDescriptorSetLayout& layout);
+		void createPipeline(const SwapChain* swapChain, 
+			const RenderPass* renderPass, 
+			std::vector<VkDescriptorSetLayout>& layouts);
 
 		/**
 		 * Returns reference to the pipeline layout

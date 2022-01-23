@@ -33,7 +33,7 @@ namespace ash
 		createTextureSampler();
 
 		m_renderPass		= std::make_unique<RenderPass>(m_logicalDevice.get(), m_swapChain.get(), m_physicalDevice.get());
-		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
+		m_graphicsPipeline	= std::make_unique<GraphicsPipeline>(m_logicalDevice.get(), m_swapChain.get(), m_renderPass.get(), m_layouts);
 
 		createDepthResources();
 		// must be called after render pass creation
@@ -88,6 +88,7 @@ namespace ash
 
 		startRenderPass(m_swapChain->getFramebuffers()[imageIndex], m_commandBuffers[imageIndex]);
 		vkCmdBindDescriptorSets(m_commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline->getLayout(), 0, 1, &m_descriptorSets[imageIndex], 0, nullptr);
+		vkCmdBindDescriptorSets(m_commandBuffers[imageIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, m_graphicsPipeline->getLayout(), 1, 1, &gameObjects[0]->getModel()->getTextureImages()[0].descriptorSet, 0, nullptr);
 		for (size_t i = 0; i < gameObjects.size(); i++)
 		{
 			gameObjects[i]->draw(m_commandBuffers[imageIndex], m_graphicsPipeline->getLayout(), imageIndex);
@@ -259,7 +260,7 @@ namespace ash
 		m_swapChain			->createSwapChain(m_window, m_surface.get(), m_physicalDevice.get());
 		m_swapChain			->createImageViews();
 		m_renderPass		->createRenderPass(m_swapChain.get(), m_physicalDevice.get());
-		m_graphicsPipeline	->createPipeline(m_swapChain.get(), m_renderPass.get(), m_descriptorSetLayout);
+		m_graphicsPipeline	->createPipeline(m_swapChain.get(), m_renderPass.get(), m_layouts);
 		createDepthResources();
 		m_swapChain			->createFramebuffers(*m_renderPass, *m_depthImage);
 
@@ -396,17 +397,40 @@ namespace ash
 		uboLayoutBinding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 		uboLayoutBinding.pImmutableSamplers = nullptr;
 
+		VkDescriptorSetLayoutCreateInfo uboLayoutInfo{};
+		uboLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		uboLayoutInfo.bindingCount = 1;
+		uboLayoutInfo.pBindings = &uboLayoutBinding;
+
+		if (vkCreateDescriptorSetLayout(*m_logicalDevice, &uboLayoutInfo, nullptr, &m_uboLayout) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor set layout!");
+		}
+
 		// image sampler
 		VkDescriptorSetLayoutBinding samplerLayoutBinding{};
-		samplerLayoutBinding.binding = 1;
+		samplerLayoutBinding.binding = 0;
 		samplerLayoutBinding.descriptorCount = 1;
 		samplerLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 		samplerLayoutBinding.pImmutableSamplers = nullptr;
 		samplerLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 
-		std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+		VkDescriptorSetLayoutCreateInfo samplerLayoutInfo{};
+		samplerLayoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+		samplerLayoutInfo.bindingCount = 1;
+		samplerLayoutInfo.pBindings = &samplerLayoutBinding;
 
-		VkDescriptorSetLayoutCreateInfo layoutInfo{};
+		if (vkCreateDescriptorSetLayout(*m_logicalDevice, &samplerLayoutInfo, nullptr, &m_textureLayout) != VK_SUCCESS)
+		{
+			throw std::runtime_error("failed to create descriptor set layout!");
+		}
+
+		m_layouts.resize(2);
+		m_layouts = { m_uboLayout, m_textureLayout };
+
+		//std::array<VkDescriptorSetLayoutBinding, 2> bindings = { uboLayoutBinding, samplerLayoutBinding };
+
+		/*VkDescriptorSetLayoutCreateInfo layoutInfo{};
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 		layoutInfo.pBindings = bindings.data();
@@ -414,12 +438,12 @@ namespace ash
 		if (vkCreateDescriptorSetLayout(*m_logicalDevice, &layoutInfo, nullptr, &m_descriptorSetLayout) != VK_SUCCESS)
 		{
 			throw std::runtime_error("failed to create descriptor set layout!");
-		}
+		}*/
 	}
 
 	void Graphics::createDescriptorSets(std::vector<std::unique_ptr<GameObject>>& gameObjects)
 	{
-		std::vector<VkDescriptorSetLayout> layouts(m_swapChain->getImageCount(), m_descriptorSetLayout);
+		std::vector<VkDescriptorSetLayout> layouts(m_swapChain->getImageCount(), m_uboLayout);
 
 		VkDescriptorSetAllocateInfo allociInfo{};
 		allociInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -440,12 +464,12 @@ namespace ash
 			bufferInfo.offset = 0;
 			bufferInfo.range = sizeof(UniformBufferObject);
 
-			VkDescriptorImageInfo imageInfo{};
-			imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-			imageInfo.imageView = *gameObjects[0]->getModel()->getTextureImages()[0].texture;	// * returns image view
-			imageInfo.sampler = m_textureSampler;
+			//VkDescriptorImageInfo imageInfo{};
+			//imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			//imageInfo.imageView = *gameObjects[0]->getModel()->getTextureImages()[0].texture;	// * returns image view
+			//imageInfo.sampler = m_textureSampler;
 
-			std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+			std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
 
 			// uniform buffer
 			descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -457,22 +481,53 @@ namespace ash
 			descriptorWrites[0].pBufferInfo = &bufferInfo;
 
 			// image sampler
-			descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			/*descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			descriptorWrites[1].dstSet = m_descriptorSets[i];
 			descriptorWrites[1].dstBinding = 1;
 			descriptorWrites[1].dstArrayElement = 0;
 			descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
 			descriptorWrites[1].descriptorCount = 1;
-			descriptorWrites[1].pImageInfo = &imageInfo;
+			descriptorWrites[1].pImageInfo = &imageInfo;*/
 
 
 			vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 		}
+
+		VkDescriptorSetAllocateInfo allocInfo{};
+		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		allocInfo.descriptorPool = *m_descriptorPool;
+		allocInfo.descriptorSetCount = 1;
+		allocInfo.pSetLayouts = &m_textureLayout;
+
+		m_descriptorSets.resize(m_swapChain->getImageCount());
+		if (vkAllocateDescriptorSets(*m_logicalDevice, &allocInfo, &gameObjects[0]->getModel()->getTextureImages()[0].descriptorSet) != VK_SUCCESS)
+		{
+			throw std::runtime_error("railed to allocate descriptor sets!");
+		}
+
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = *gameObjects[0]->getModel()->getTextureImages()[0].texture;	// * returns image view
+		imageInfo.sampler = m_textureSampler;
+
+		std::array<VkWriteDescriptorSet, 1> descriptorWrites{};
+
+		descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+		descriptorWrites[0].dstSet = gameObjects[0]->getModel()->getTextureImages()[0].descriptorSet;
+		descriptorWrites[0].dstBinding = 0;
+		descriptorWrites[0].dstArrayElement = 0;
+		descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		descriptorWrites[0].descriptorCount = 1;
+		descriptorWrites[0].pImageInfo = &imageInfo;
+
+		vkUpdateDescriptorSets(*m_logicalDevice, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
 
 	void Graphics::cleanupDescriptorSetLayout()
 	{
 		vkDestroyDescriptorSetLayout(*m_logicalDevice, m_descriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(*m_logicalDevice, m_uboLayout, nullptr);
+		vkDestroyDescriptorSetLayout(*m_logicalDevice, m_textureLayout, nullptr);
 	}
 
 	void Graphics::cleanupDescriptorSets()
