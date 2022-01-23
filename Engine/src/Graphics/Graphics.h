@@ -47,7 +47,7 @@ namespace ash
 		/**
 		 * Generates a Model, this is here because Model.h requires access to the Vulkan device
 		 */
-		std::unique_ptr<Model> generateModel(std::string modelPath, std::string texturePath);
+		std::unique_ptr<Model> generateModel(std::string modelPath);
 
 		/**
 		 * Gets the current aspect ration of the swap chain images

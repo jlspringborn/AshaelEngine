@@ -83,8 +83,7 @@ namespace ash
 			VkDescriptorPool pool,
 			VkSampler sampler, 
 			std::vector<std::unique_ptr<Buffer>>& uniformBuffers,
-			std::string modelPath,
-			std::string texturePath
+			std::string modelPath
 		);
 
 		~Model();

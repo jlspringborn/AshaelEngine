@@ -150,7 +150,7 @@ namespace ash
 		vkDeviceWaitIdle(*m_logicalDevice);
 	}
 
-	std::unique_ptr<Model> Graphics::generateModel(std::string modelPath, std::string texturePath)
+	std::unique_ptr<Model> Graphics::generateModel(std::string modelPath)
 	{
 		std::unique_ptr<Model> model = std::make_unique<Model>
 			(
@@ -161,12 +161,10 @@ namespace ash
 			m_descriptorPool->getPool(), 
 			m_textureSampler,
 			m_uniformBuffers,
-			modelPath,
-			texturePath
+			modelPath
 			);
 		return std::move(model);
 	}
-
 
 	void Graphics::createCommandBuffers()
 	{
