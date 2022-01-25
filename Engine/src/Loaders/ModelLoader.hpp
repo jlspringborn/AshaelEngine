@@ -123,36 +123,47 @@ namespace ash
 		}
 	}
 
-	void loadNode(const tinygltf::Node& inputNode, 
+	void loadNode(
+		const tinygltf::Node& inputNode, 
 		const tinygltf::Model& input, 
-		Node* parent, 
+		Node* parent,
+		uint32_t nodeIndex,
 		std::vector<uint32_t>& outIndices, 
 		std::vector<Vertex>& outVertices, 
 		std::vector<Node*>& nodes)
 	{
 		Node* node = new Node{};
-		node->matrix = glm::mat4(1.0f);
+		node->parent	= parent;
+		node->matrix	= glm::mat4(1.0f);
+		node->index		= nodeIndex;
+		node->skin		= inputNode.skin;
 
 		// Get the local node matrix
 		// It's either made up from translation, rotation, scale or a 4x4 matrix
-		if (inputNode.translation.size() == 3) {
+		if (inputNode.translation.size() == 3) 
+		{
 			node->matrix = glm::translate(node->matrix, glm::vec3(glm::make_vec3(inputNode.translation.data())));
 		}
-		if (inputNode.rotation.size() == 4) {
+		if (inputNode.rotation.size() == 4) 
+		{
 			glm::quat q = glm::make_quat(inputNode.rotation.data());
 			node->matrix *= glm::mat4(q);
 		}
-		if (inputNode.scale.size() == 3) {
+		if (inputNode.scale.size() == 3) 
+		{
 			node->matrix = glm::scale(node->matrix, glm::vec3(glm::make_vec3(inputNode.scale.data())));
 		}
-		if (inputNode.matrix.size() == 16) {
+		if (inputNode.matrix.size() == 16) 
+		{
 			node->matrix = glm::make_mat4x4(inputNode.matrix.data());
 		};
 
 		// Load node's children
-		if (inputNode.children.size() > 0) {
-			for (size_t i = 0; i < inputNode.children.size(); i++) {
-				loadNode(input.nodes[inputNode.children[i]], input, node, outIndices, outVertices, nodes);
+		if (inputNode.children.size() > 0) 
+		{
+			for (size_t i = 0; i < inputNode.children.size(); i++) 
+			{
+				loadNode(input.nodes[inputNode.children[i]], input, node, inputNode.children[i], outIndices, outVertices, nodes);
 			}
 		}
 
@@ -161,7 +172,8 @@ namespace ash
 		if (inputNode.mesh > -1) {
 			const tinygltf::Mesh mesh = input.meshes[inputNode.mesh];
 			// Iterate through all primitives of this node's mesh
-			for (size_t i = 0; i < mesh.primitives.size(); i++) {
+			for (size_t i = 0; i < mesh.primitives.size(); i++) 
+			{
 				const tinygltf::Primitive& glTFPrimitive = mesh.primitives[i];
 				uint32_t firstIndex = static_cast<uint32_t>(outIndices.size());
 				uint32_t vertexStart = static_cast<uint32_t>(outVertices.size());
@@ -174,28 +186,32 @@ namespace ash
 					size_t vertexCount = 0;
 
 					// Get buffer data for vertex normals
-					if (glTFPrimitive.attributes.find("POSITION") != glTFPrimitive.attributes.end()) {
+					if (glTFPrimitive.attributes.find("POSITION") != glTFPrimitive.attributes.end()) 
+					{
 						const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("POSITION")->second];
 						const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
 						positionBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
 						vertexCount = accessor.count;
 					}
 					// Get buffer data for vertex normals
-					if (glTFPrimitive.attributes.find("NORMAL") != glTFPrimitive.attributes.end()) {
+					if (glTFPrimitive.attributes.find("NORMAL") != glTFPrimitive.attributes.end()) 
+					{
 						const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("NORMAL")->second];
 						const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
 						normalsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
 					}
 					// Get buffer data for vertex texture coordinates
 					// glTF supports multiple sets, we only load the first one
-					if (glTFPrimitive.attributes.find("TEXCOORD_0") != glTFPrimitive.attributes.end()) {
+					if (glTFPrimitive.attributes.find("TEXCOORD_0") != glTFPrimitive.attributes.end()) 
+					{
 						const tinygltf::Accessor& accessor = input.accessors[glTFPrimitive.attributes.find("TEXCOORD_0")->second];
 						const tinygltf::BufferView& view = input.bufferViews[accessor.bufferView];
 						texCoordsBuffer = reinterpret_cast<const float*>(&(input.buffers[view.buffer].data[accessor.byteOffset + view.byteOffset]));
 					}
 
 					// Append data to model's vertex buffer
-					for (size_t v = 0; v < vertexCount; v++) {
+					for (size_t v = 0; v < vertexCount; v++) 
+					{
 						Vertex vert{};
 						vert.pos = glm::vec4(glm::make_vec3(&positionBuffer[v * 3]), 1.0f);
 						vert.normal = glm::normalize(glm::vec3(normalsBuffer ? glm::make_vec3(&normalsBuffer[v * 3]) : glm::vec3(0.0f)));
@@ -214,23 +230,29 @@ namespace ash
 
 					// glTF supports different component types of indices
 					switch (accessor.componentType) {
-					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: {
+					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_INT: 
+					{
 						const uint32_t* buf = reinterpret_cast<const uint32_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
-						for (size_t index = 0; index < accessor.count; index++) {
+						for (size_t index = 0; index < accessor.count; index++) 
+						{
 							outIndices.push_back(buf[index] + vertexStart);
 						}
 						break;
 					}
-					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: {
+					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_SHORT: 
+					{
 						const uint16_t* buf = reinterpret_cast<const uint16_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
-						for (size_t index = 0; index < accessor.count; index++) {
+						for (size_t index = 0; index < accessor.count; index++) 
+						{
 							outIndices.push_back(buf[index] + vertexStart);
 						}
 						break;
 					}
-					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: {
+					case TINYGLTF_PARAMETER_TYPE_UNSIGNED_BYTE: 
+					{
 						const uint8_t* buf = reinterpret_cast<const uint8_t*>(&buffer.data[accessor.byteOffset + bufferView.byteOffset]);
-						for (size_t index = 0; index < accessor.count; index++) {
+						for (size_t index = 0; index < accessor.count; index++) 
+						{
 							outIndices.push_back(buf[index] + vertexStart);
 						}
 						break;
@@ -269,17 +291,24 @@ namespace ash
 			loadMaterials(glTFInput, model);
 			loadTextures(glTFInput, model);
 			const tinygltf::Scene& scene = glTFInput.scenes[0];
-			for (size_t i = 0; i < scene.nodes.size(); i++) {
+			for (size_t i = 0; i < scene.nodes.size(); i++) 
+			{
 				const tinygltf::Node node = glTFInput.nodes[scene.nodes[i]];
-				loadNode(node, glTFInput, nullptr, model.getIndices(), model.getVertices(), model.getNodes());
+				loadNode(node, glTFInput, nullptr, scene.nodes[i], model.getIndices(), model.getVertices(), model.getNodes());
 			}
 		}
-		else {
+		else 
+		{
 			throw std::runtime_error("Could not open the glTF file.\n\nThe file is part of the additional asset pack.\n\nRun \"download_assets.py\" in the repository root to download the latest version.");
 			return;
 		}
 	}
 
+
+
+
+	// TODO: fix hash table and re-implement obj loader function
+	// NOTE: this may not be needed since we're loading from glTF now
 
 	///**
 	// * Load model from obj file
