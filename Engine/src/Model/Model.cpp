@@ -66,7 +66,7 @@ namespace ash
 		vkCmdBindIndexBuffer(commandBuffer, *m_indexBuffer, 0, VK_INDEX_TYPE_UINT32);
 		// Render all nodes at top-level
 		for (auto& node : nodes) {
-			drawNode(commandBuffer, pipelineLayout, node);
+			drawNode(commandBuffer, pipelineLayout, *node);
 		}
 	}
 
@@ -148,7 +148,7 @@ namespace ash
 			}
 		}
 		for (auto& child : node.children) {
-			drawNode(commandBuffer, pipelineLayout, child);
+			drawNode(commandBuffer, pipelineLayout, *child);
 		}
 	}
 

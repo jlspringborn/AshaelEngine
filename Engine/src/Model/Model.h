@@ -41,7 +41,7 @@ namespace ash
 	struct Node
 	{
 		Node* parent;
-		std::vector<Node> children;
+		std::vector<Node*> children;
 		Mesh mesh;
 		glm::mat4 matrix;
 	};
@@ -108,7 +108,7 @@ namespace ash
 		 */
 		void createTexture(const PhysicalDevice* physicalDevice, std::string texturePath);
 
-		std::vector<Node>& getNodes() { return nodes; }
+		std::vector<Node*>& getNodes() { return nodes; }
 
 		std::vector<Vertex>& getVertices() { return m_vertices; }
 
@@ -158,7 +158,7 @@ namespace ash
 		std::unique_ptr<Image> m_texture{};
 
 
-		std::vector<Node> nodes;
+		std::vector<Node*> nodes;
 
 		std::vector<TextureImage> m_textureImages;
 

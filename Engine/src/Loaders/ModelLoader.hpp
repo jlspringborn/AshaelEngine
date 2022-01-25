@@ -128,31 +128,31 @@ namespace ash
 		Node* parent, 
 		std::vector<uint32_t>& outIndices, 
 		std::vector<Vertex>& outVertices, 
-		std::vector<Node>& nodes)
+		std::vector<Node*>& nodes)
 	{
-		Node node{};
-		node.matrix = glm::mat4(1.0f);
+		Node* node = new Node{};
+		node->matrix = glm::mat4(1.0f);
 
 		// Get the local node matrix
 		// It's either made up from translation, rotation, scale or a 4x4 matrix
 		if (inputNode.translation.size() == 3) {
-			node.matrix = glm::translate(node.matrix, glm::vec3(glm::make_vec3(inputNode.translation.data())));
+			node->matrix = glm::translate(node->matrix, glm::vec3(glm::make_vec3(inputNode.translation.data())));
 		}
 		if (inputNode.rotation.size() == 4) {
 			glm::quat q = glm::make_quat(inputNode.rotation.data());
-			node.matrix *= glm::mat4(q);
+			node->matrix *= glm::mat4(q);
 		}
 		if (inputNode.scale.size() == 3) {
-			node.matrix = glm::scale(node.matrix, glm::vec3(glm::make_vec3(inputNode.scale.data())));
+			node->matrix = glm::scale(node->matrix, glm::vec3(glm::make_vec3(inputNode.scale.data())));
 		}
 		if (inputNode.matrix.size() == 16) {
-			node.matrix = glm::make_mat4x4(inputNode.matrix.data());
+			node->matrix = glm::make_mat4x4(inputNode.matrix.data());
 		};
 
 		// Load node's children
 		if (inputNode.children.size() > 0) {
 			for (size_t i = 0; i < inputNode.children.size(); i++) {
-				loadNode(input.nodes[inputNode.children[i]], input, &node, outIndices, outVertices, nodes);
+				loadNode(input.nodes[inputNode.children[i]], input, node, outIndices, outVertices, nodes);
 			}
 		}
 
@@ -244,7 +244,7 @@ namespace ash
 				primitive.firstIndex = firstIndex;
 				primitive.indexCount = indexCount;
 				primitive.materialIndex = glTFPrimitive.material;
-				node.mesh.primitives.push_back(primitive);
+				node->mesh.primitives.push_back(primitive);
 			}
 		}
 
