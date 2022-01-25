@@ -25,6 +25,8 @@ namespace ash
 		glm::vec3 normal;
 		glm::vec2 uv;		// Texture coordinate
 		glm::vec3 color;	// Vertex color
+		glm::vec4 jointIndices;
+		glm::vec4 jointWeights;
 
 		static VkVertexInputBindingDescription getBindingDescription()
 		{
@@ -35,9 +37,9 @@ namespace ash
 			return bindingDescription;
 		}
 
-		static std::array<VkVertexInputAttributeDescription, 4> getAttributeDescriptions()
+		static std::array<VkVertexInputAttributeDescription, 6> getAttributeDescriptions()
 		{
-			std::array<VkVertexInputAttributeDescription, 4> attributeDescriptions{};
+			std::array<VkVertexInputAttributeDescription, 6> attributeDescriptions{};
 
 			// position
 			attributeDescriptions[0].binding	= 0;
@@ -63,26 +65,52 @@ namespace ash
 			attributeDescriptions[3].format		= VK_FORMAT_R32G32B32_SFLOAT;
 			attributeDescriptions[3].offset		= offsetof(Vertex, color);
 
+			// joint indices
+			attributeDescriptions[4].binding = 0;
+			attributeDescriptions[4].location = 4;
+			attributeDescriptions[4].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			attributeDescriptions[4].offset = offsetof(Vertex, jointIndices);
+
+
+			// joint weights
+			attributeDescriptions[5].binding = 0;
+			attributeDescriptions[5].location = 5;
+			attributeDescriptions[5].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+			attributeDescriptions[5].offset = offsetof(Vertex, jointWeights);
+
 			return attributeDescriptions;
 		}
 
-		/**
-		 * Override == operator for easy comparing to other vertices
-		 */
-		bool operator==(const Vertex& other) const
-		{
-			return pos == other.pos && normal == other.normal  && uv== other.uv && color == other.color;
-		}
+		///**
+		// * Override == operator for easy comparing to other vertices
+		// */
+		//bool operator==(const Vertex& other) const
+		//{
+		//	return pos == other.pos 
+		//		&& normal == other.normal  
+		//		&& uv== other.uv 
+		//		&& color == other.color
+		//		&& jointIndices == other.jointIndices
+		//		&& jointWeights == other.jointWeights;
+		//}
 	};
 }
 
 namespace std 
 {
-	template<> struct hash<ash::Vertex> 
+	/*template<> struct hash<ash::Vertex>
 	{
-		size_t operator()(ash::Vertex const& vertex) const 
+		size_t operator()(ash::Vertex const& vertex) const
 		{
-			return ((hash<glm::vec3>()(vertex.pos) ^ (hash<glm::vec3>()(vertex.normal)  ^ (hash<glm::vec2>()(vertex.uv) << 1) ^ (hash<glm::vec3>()(vertex.color) << 1)) >> 1));
+			return ((hash<glm::vec3>()(vertex.pos)
+					^ (hash<glm::vec3>()(vertex.normal)
+						^ (hash<glm::vec3>()(vertex.jointWeights)
+						^ (hash<glm::vec3>()(vertex.jointIndices)
+						^ (hash<glm::vec2>()(vertex.uv) << 1)
+						^ (hash<glm::vec3>()(vertex.color) << 1))
+
+
+				>> 1))));
 		}
-	};
+	};*/
 }
