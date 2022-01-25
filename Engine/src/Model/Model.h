@@ -53,6 +53,44 @@ namespace ash
 		glm::mat4			getLocalMatrix();
 	};
 
+	//
+	struct Skin
+	{
+		std::string					name					{};
+		Node*						skeletonRoot			{ nullptr };
+		std::vector<glm::mat4>		inverseBindMatrices		{};
+		std::vector<Node*>			joints					{};
+		std::unique_ptr<Buffer>		ssbo					{};
+		VkDescriptorSet				descriptorSet			{};
+	};
+
+	// Contains key frame data
+	struct AnimationSampler
+	{
+		std::string					interpolation			{};
+		std::vector<float>			inputs					{};
+		std::vector<glm::vec4>		outputsVec4				{};
+	};
+
+	// Connects node to a key frame
+	struct AnimationChannel
+	{
+		std::string					path					{};
+		Node*						node					{};
+		uint32_t					samplerIndex			{};
+	};
+
+	// Contains animation samplers, channels, and timing info for an animation
+	struct Animation
+	{
+		std::string							name			{};
+		std::vector<AnimationSampler>		samplers		{};
+		std::vector<AnimationChannel>		channels		{};
+		float								start			{ std::numeric_limits<float>::max() };
+		float								end				{ std::numeric_limits<float>::min() };
+		float								currentTime		{ 0.0f };
+	};
+
 	// A glTF material stores information in e.g. the texture that is attached to it and colors
 	struct Material 
 	{

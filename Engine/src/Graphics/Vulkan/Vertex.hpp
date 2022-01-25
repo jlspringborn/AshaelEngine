@@ -21,12 +21,12 @@ namespace ash
 {
 	struct Vertex
 	{
-		glm::vec3 pos;		// Position
-		glm::vec3 normal;
-		glm::vec2 uv;		// Texture coordinate
-		glm::vec3 color;	// Vertex color
-		glm::vec4 jointIndices;
-		glm::vec4 jointWeights;
+		glm::vec3		pos;			// Position
+		glm::vec3		normal;			// not currently used
+		glm::vec2		uv;				// Texture coordinate
+		glm::vec3		color;			// not currently used
+		glm::vec4		jointIndices;	// glTF supports 4 indices per joint
+		glm::vec4		jointWeights;	// glTF supports 4 weights per joint
 
 		static VkVertexInputBindingDescription getBindingDescription()
 		{
