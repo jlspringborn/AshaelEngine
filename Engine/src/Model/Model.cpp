@@ -229,4 +229,12 @@ namespace ash
 		m_texture->copyFromBuffer(*stagingBuffer, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
 		m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	}
+
+	glm::mat4 Node::getLocalMatrix()
+	{
+		return glm::translate(glm::mat4(1.0f), translation) 
+			* glm::mat4(rotation) 
+			* glm::scale(glm::mat4(1.0f), scale) 
+			* matrix;
+	}
 }

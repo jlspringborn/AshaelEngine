@@ -40,10 +40,17 @@ namespace ash
 
 	struct Node
 	{
-		Node* parent;
-		std::vector<Node*> children;
-		Mesh mesh;
-		glm::mat4 matrix;
+		Node*				parent			{};
+		uint32_t			index			{};
+		std::vector<Node*>	children		{};
+		Mesh				mesh			{};
+		glm::vec3			translation		{};
+		glm::vec3			scale			{ 1.0f };
+		glm::quat			rotation		{};
+		int32_t				skin			{ -1 };
+		glm::mat4			matrix			{};
+
+		glm::mat4			getLocalMatrix();
 	};
 
 	// A glTF material stores information in e.g. the texture that is attached to it and colors
