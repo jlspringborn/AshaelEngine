@@ -167,11 +167,17 @@ namespace ash
 		std::vector<Material>& getMaterials() { return m_materials; }
 
 		std::vector<Skin>& getSkins() { return m_skins; }
+		
+		std::vector<Animation>& getAnimations() { return m_animations; }
 
 		// Draw a single node including child nodes (if present)
 		void drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node);
 
 		void createDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout layout, VkSampler sampler);
+
+		glm::mat4 getNodeMatrix(Node* node);
+
+		void updateJoints(Node* node);
 
 	private:
 
@@ -215,6 +221,8 @@ namespace ash
 		std::vector<Texture> m_textures;
 
 		std::vector<Skin> m_skins;
+
+		std::vector<Animation> m_animations;
 
 	};
 }

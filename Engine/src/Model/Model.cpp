@@ -159,6 +159,36 @@ namespace ash
 
 	}
 
+	glm::mat4 Model::getNodeMatrix(Node* node)
+	{
+		glm::mat4	nodeMatrix		{ node->getLocalMatrix() };
+		Node*		currentParent	{ node->parent };
+
+		while (currentParent)
+		{
+			nodeMatrix		= currentParent->getLocalMatrix() * nodeMatrix;
+			currentParent	= currentParent->parent;
+		}
+		return nodeMatrix;
+	}
+
+	void Model::updateJoints(Node* node)
+	{
+		if (node->skin > -1)
+		{
+			// update the joint matrices
+			glm::mat4 inverseTransform{ glm::inverse(getNodeMatrix(node)) };
+		//	Skin skin = m_skins[node->skin];
+		//	size_t numJoints{ (uint32_t)skin.joints.size() };
+		//	std::vector<glm::mat4> jointMatrices(numJoints);
+		//	for (size_t i = 0; i < numJoints; i++)
+		//	{
+		//		jointMatrices[i] = getNodeMatrix(skin.joints[i]) * skin.inverseBindMatrices[i];
+		//		jointMatrices[i] = inverseTransform * jointMatrices[i];
+		//	}
+		}
+	}
+
 	// NOT CURRENTLY USED: textures are now loaded directly from glTF files
 	
 	//void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)

@@ -207,6 +207,102 @@ namespace ash
 		}
 	}
 
+	void loadAnimations(tinygltf::Model& input, Model& model)
+	{
+		std::vector<Animation>& animations{ model.getAnimations() };
+		animations.resize(input.animations.size());
+
+		for (size_t i = 0; i < input.animations.size(); i++)
+		{
+			tinygltf::Animation glTFAnimation{ input.animations[i] };
+			animations[i].name = glTFAnimation.name;
+
+			// samplers
+			animations[i].samplers.resize(glTFAnimation.samplers.size());
+			for (size_t j = 0; j < glTFAnimation.samplers.size(); j++)
+			{
+				tinygltf::AnimationSampler	glTFSampler	{ glTFAnimation.samplers[j] };
+				AnimationSampler&			dstSampler	{ animations[i].samplers[j] };
+
+				dstSampler.interpolation = glTFSampler.interpolation;
+
+				// read sampler keyframe input time values
+				{
+					const tinygltf::Accessor&	accessor	{ input.accessors[glTFSampler.input] };
+					const tinygltf::BufferView& bufferView	{ input.bufferViews[accessor.bufferView] };
+					const tinygltf::Buffer&		buffer		{ input.buffers[bufferView.buffer] };
+					const void*					dataPtr		{ &buffer.data[accessor.byteOffset + bufferView.byteOffset] };
+					const float*				buf			{ static_cast<const float*>(dataPtr) };
+
+					for (size_t index = 0; index < accessor.count; index++)
+					{
+						dstSampler.inputs.push_back(buf[index]);
+					}
+
+					// adjust animation's start and end times
+
+					for (auto input : animations[i].samplers[j].inputs)
+					{
+						if (input < animations[i].start)
+						{
+							animations[i].start = input;
+						};
+						if (input > animations[i].end)
+						{
+							animations[i].end = input;
+						}
+
+					}
+				}
+				// read sampler key frame output translate/rotate/scale values
+				{
+					const tinygltf::Accessor&	accessor	{ input.accessors[glTFSampler.output] };
+					const tinygltf::BufferView& bufferView	{ input.bufferViews[accessor.bufferView] };
+					const tinygltf::Buffer&		buffer		{ input.buffers[bufferView.buffer] };
+					const void*					dataPtr		{ &buffer.data[accessor.byteOffset + bufferView.byteOffset] };
+
+					switch (accessor.type)
+					{
+					case TINYGLTF_TYPE_VEC3:
+					{
+						const glm::vec3* buf{ static_cast<const glm::vec3*>(dataPtr) };
+						for (size_t index = 0; index < accessor.count; index++)
+						{
+							dstSampler.outputsVec4.push_back(glm::vec4(buf[index], 0.0f));
+						}
+						break;
+					}
+					case TINYGLTF_TYPE_VEC4:
+					{
+						const glm::vec4* buf{ static_cast<const glm::vec4*>(dataPtr) };
+						for (size_t index = 0; index < accessor.count; index++)
+						{
+							dstSampler.outputsVec4.push_back(buf[index]);
+						}
+						break;
+					}
+					default:
+						std::cout << "unknown type" << '\n';
+						break;
+					}
+				}
+			}
+			// channels
+			animations[i].channels.resize(glTFAnimation.channels.size());
+			for (size_t j = 0; j < glTFAnimation.channels.size(); j++)
+			{
+				tinygltf::AnimationChannel	glTFChannel	{ glTFAnimation.channels[j] };
+				AnimationChannel&			dstChannel	{ animations[i].channels[j] };
+
+				dstChannel.path			= glTFChannel.target_path;
+				dstChannel.samplerIndex	= glTFChannel.sampler;
+				dstChannel.node			= getNodeFromIndex(glTFChannel.target_node, model);
+			}
+		}
+
+		}
+
+
 	void loadNode(
 		const tinygltf::Node& inputNode, 
 		const tinygltf::Model& input, 
@@ -406,9 +502,10 @@ namespace ash
 
 	void loadglTFFile(std::string filename, Model& model, const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice)
 	{
-		tinygltf::Model glTFInput;
-		tinygltf::TinyGLTF gltfContext;
-		std::string error, warning;
+		tinygltf::Model		glTFInput;
+		tinygltf::TinyGLTF	gltfContext;
+		std::string			error;
+		std::string			warning;
 
 		bool fileLoaded = gltfContext.LoadASCIIFromFile(&glTFInput, &error, &warning, filename);
 
@@ -422,6 +519,8 @@ namespace ash
 				const tinygltf::Node node = glTFInput.nodes[scene.nodes[i]];
 				loadNode(node, glTFInput, nullptr, scene.nodes[i], model.getIndices(), model.getVertices(), model.getNodes());
 			}
+			loadSkins(glTFInput, model, logicalDevice, physicalDevice);
+			loadAnimations(glTFInput, model);
 		}
 		else 
 		{

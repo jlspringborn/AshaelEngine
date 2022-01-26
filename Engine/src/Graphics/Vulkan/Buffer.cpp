@@ -65,7 +65,7 @@ namespace ash
 		const void* inData, 
 		VkBufferUsageFlagBits usage)
 	{
-		// Store inverse bind matrices for this skin in a shader storage buffer object
+		// create staging buffer for transfer operation
 		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
 		logicalDevice,
 		physicalDevice,
@@ -73,11 +73,13 @@ namespace ash
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
 
+		// directly copy the data into device coherent memory
 		void* data;
-		vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
+		vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);	// 
 		memcpy(data, inData, (size_t)bufferSize);
 		vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
 
+		// create the buffer that will you device local memory
 		std::unique_ptr<Buffer> localBuffer = std::make_unique<Buffer>(
 			logicalDevice,
 			physicalDevice,
@@ -85,8 +87,10 @@ namespace ash
 			VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
+		// copy the data from the host coherent buffer to the device local buffer
 		localBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
 
+		// return the smart ptr for the local buffer
 		return std::move(localBuffer);
 	}
 }
