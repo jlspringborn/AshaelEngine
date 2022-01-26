@@ -10,6 +10,7 @@
 #include "Vulkan/PhysicalDevice.h"
 #include "Vulkan/LogicalDevice.h"
 #include "Vulkan/Vertex.hpp"
+#include "Vulkan/Buffer.h"
 
 // TODO: This file is throwing a API REDEFINITION warning. It's related to glfw.h and windows.h
 #define TINYGLTF_IMPLEMENTATION
@@ -32,6 +33,7 @@
 #include <string>
 #include <stdexcept>
 #include <unordered_map>
+#include <memory>
 
 namespace ash
 {
@@ -119,6 +121,103 @@ namespace ash
 			if (deleteBuffer) 
 			{
 				delete[] buffer;
+			}
+		}
+	}
+
+	Node* findNode(Node* parent, uint32_t index)
+	{
+		Node* nodeFound{ nullptr };
+		if (parent->index == index)
+		{
+			return parent;
+		}
+		for (auto& child : parent->children)
+		{
+			nodeFound = findNode(child, index);
+			if (nodeFound)
+			{
+				break;
+			}
+		}
+		return nodeFound;
+	}
+
+	Node* getNodeFromIndex(uint32_t index, Model& model)
+	{
+		Node* nodeFound{ nullptr };
+		for (auto& node : model.getNodes())
+		{
+			nodeFound = findNode(node, index);
+			if (nodeFound)
+			{
+				break;
+			}
+		}
+		return nodeFound;
+	}
+
+	void loadSkins(tinygltf::Model& input, Model& model, const LogicalDevice* logicalDevice, const PhysicalDevice* physicalDevice)
+	{
+		std::vector<Skin>& skins{ model.getSkins() };
+
+		skins.resize(input.skins.size());
+
+		for (size_t i = 0; i < input.skins.size(); i++)
+		{
+			tinygltf::Skin glTFSkin{ input.skins[i] };
+
+			skins[i].name = glTFSkin.name;
+
+			// Find the root node of the skeleton
+			skins[i].skeletonRoot = getNodeFromIndex(glTFSkin.skeleton, model);
+
+			// Find joint nodes
+			for (int jointIndex : glTFSkin.joints)
+			{
+				Node* node{ getNodeFromIndex(jointIndex, model) };
+
+				if (node)
+				{
+					skins[i].joints.push_back(node);
+				}
+			}
+
+			// Get the inverse bind matrices from the buffer associated to this skin
+			if (glTFSkin.inverseBindMatrices > -1)
+			{
+				const tinygltf::Accessor& accessor{ input.accessors[glTFSkin.inverseBindMatrices] };
+				const tinygltf::BufferView& bufferView{ input.bufferViews[accessor.bufferView] };
+				const tinygltf::Buffer& buffer{ input.buffers[bufferView.buffer] };
+				skins[i].inverseBindMatrices.resize(accessor.count);
+				memcpy(skins[i].inverseBindMatrices.data(), 
+					&buffer.data[accessor.byteOffset + bufferView.byteOffset], 
+					accessor.count * sizeof(glm::mat4));
+
+				VkDeviceSize bufferSize = sizeof(glm::mat4) * skins[i].inverseBindMatrices.size();
+
+				// Store inverse bind matrices for this skin in a shader storage buffer object
+				std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
+				logicalDevice,
+				physicalDevice,
+				bufferSize,
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
+
+				void* data;
+				vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
+				memcpy(data, skins[i].inverseBindMatrices.data(), (size_t)bufferSize);
+				vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
+
+				skins[i].ssbo = std::make_unique<Buffer>(
+					logicalDevice,
+					physicalDevice,
+					bufferSize,
+					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+				skins[i].ssbo->copyBuffer(stagingBuffer.get(), bufferSize);
+
 			}
 		}
 	}

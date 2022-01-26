@@ -165,6 +165,8 @@ namespace ash
 		
 		std::vector<Material>& getMaterials() { return m_materials; }
 
+		std::vector<Skin>& getSkins() { return m_skins; }
+
 		// Draw a single node including child nodes (if present)
 		void drawNode(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, Node node);
 
@@ -211,6 +213,7 @@ namespace ash
 
 		std::vector<Texture> m_textures;
 
+		std::vector<Skin> m_skins;
 
 	};
 }
