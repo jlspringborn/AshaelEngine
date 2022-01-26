@@ -159,6 +159,8 @@ namespace ash
 
 	}
 
+	// NOT CURRENTLY USED: textures are now loaded directly from glTF files
+	
 	//void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)
 	//{
 	//	int texWidth;

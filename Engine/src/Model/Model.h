@@ -149,9 +149,10 @@ namespace ash
 		void createIndexBuffer(const PhysicalDevice* physicalDevice);
 
 		/**
+		 * NOT CURRENTLY USED: textures are now loaded directly from glTF files
 		 * Creates texture image to display on geometry
 		 */
-		void createTexture(const PhysicalDevice* physicalDevice, std::string texturePath);
+		//void createTexture(const PhysicalDevice* physicalDevice, std::string texturePath);
 
 		std::vector<Node*>& getNodes() { return nodes; }
 
