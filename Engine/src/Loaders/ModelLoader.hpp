@@ -193,31 +193,16 @@ namespace ash
 				memcpy(skins[i].inverseBindMatrices.data(), 
 					&buffer.data[accessor.byteOffset + bufferView.byteOffset], 
 					accessor.count * sizeof(glm::mat4));
+				
+				// TODO: find a way to compress local buffer creation into a reusable function
 
 				VkDeviceSize bufferSize = sizeof(glm::mat4) * skins[i].inverseBindMatrices.size();
-
-				// Store inverse bind matrices for this skin in a shader storage buffer object
-				std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
-				logicalDevice,
-				physicalDevice,
-				bufferSize,
-				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
-
-				void* data;
-				vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
-				memcpy(data, skins[i].inverseBindMatrices.data(), (size_t)bufferSize);
-				vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
-
-				skins[i].ssbo = std::make_unique<Buffer>(
-					logicalDevice,
-					physicalDevice,
-					bufferSize,
-					VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-					VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-				skins[i].ssbo->copyBuffer(stagingBuffer.get(), bufferSize);
-
+				skins[i].ssbo = Buffer::createDeviceLocalBuffer(
+					logicalDevice, 
+					physicalDevice, 
+					bufferSize, 
+					skins[i].inverseBindMatrices.data(), 
+					VK_BUFFER_USAGE_STORAGE_BUFFER_BIT);
 			}
 		}
 	}

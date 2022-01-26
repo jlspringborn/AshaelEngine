@@ -74,53 +74,24 @@ namespace ash
 	{
 		VkDeviceSize bufferSize = sizeof(m_vertices[0]) * m_vertices.size();
 
-		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
-			m_logicalDevice,
-			physicalDevice,
-			bufferSize,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
-
-		void* data;
-		vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
-		memcpy(data, m_vertices.data(), (size_t)bufferSize);
-		vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
-
-		m_vertexBuffer = std::make_unique<Buffer>(
-			m_logicalDevice,
-			physicalDevice,
-			bufferSize,
-			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		m_vertexBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
-
+		m_vertexBuffer = Buffer::createDeviceLocalBuffer(
+			m_logicalDevice, 
+			physicalDevice, 
+			bufferSize, 
+			m_vertices.data(), 
+			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
 	}
 
 	void Model::createIndexBuffer(const PhysicalDevice* physicalDevice)
 	{
 		VkDeviceSize bufferSize = sizeof(m_indices[0]) * m_indices.size();
 
-		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
+		m_indexBuffer = Buffer::createDeviceLocalBuffer(
 			m_logicalDevice,
 			physicalDevice,
 			bufferSize,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
-
-		void* data;
-		vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
-		memcpy(data, m_indices.data(), (size_t)bufferSize);
-		vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
-
-		m_indexBuffer = std::make_unique<Buffer>(
-			m_logicalDevice, 
-			physicalDevice, 
-			bufferSize, 
-			VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-
-		m_indexBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
+			m_indices.data(),
+			VK_BUFFER_USAGE_INDEX_BUFFER_BIT);
 	}
 
 
@@ -188,47 +159,47 @@ namespace ash
 
 	}
 
-	void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)
-	{
-		int texWidth;
-		int texHeight;
-		int texChannels;
-		stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+	//void Model::createTexture(const PhysicalDevice* physicalDevice, std::string texturePath)
+	//{
+	//	int texWidth;
+	//	int texHeight;
+	//	int texChannels;
+	//	stbi_uc* pixels = stbi_load(texturePath.c_str(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 
-		VkDeviceSize imageSize = texWidth * texHeight * 4;
+	//	VkDeviceSize imageSize = texWidth * texHeight * 4;
 
-		if (!pixels)
-		{
-			throw std::runtime_error("failed to load texture image!");
-		}
+	//	if (!pixels)
+	//	{
+	//		throw std::runtime_error("failed to load texture image!");
+	//	}
 
-		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
-			m_logicalDevice,
-			physicalDevice,
-			imageSize,
-			VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-			VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
+	//	std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
+	//		m_logicalDevice,
+	//		physicalDevice,
+	//		imageSize,
+	//		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+	//		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
 
-		void* data;
-		vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, imageSize, 0, &data);
-		memcpy(data, pixels, static_cast<size_t>(imageSize));
-		vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
+	//	void* data;
+	//	vkMapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory(), 0, imageSize, 0, &data);
+	//	memcpy(data, pixels, static_cast<size_t>(imageSize));
+	//	vkUnmapMemory(*m_logicalDevice, stagingBuffer->getBufferMemory());
 
-		stbi_image_free(pixels);
+	//	stbi_image_free(pixels);
 
-		m_texture = std::make_unique<Image>(
-			m_logicalDevice, 
-			physicalDevice, 
-			texWidth, 
-			texHeight, 
-			VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VK_IMAGE_ASPECT_COLOR_BIT);
+	//	m_texture = std::make_unique<Image>(
+	//		m_logicalDevice, 
+	//		physicalDevice, 
+	//		texWidth, 
+	//		texHeight, 
+	//		VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_TILING_OPTIMAL,
+	//		VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+	//		VK_IMAGE_ASPECT_COLOR_BIT);
 
-		m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		m_texture->copyFromBuffer(*stagingBuffer, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
-		m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-	}
+	//	m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	//	m_texture->copyFromBuffer(*stagingBuffer, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+	//	m_texture->transitionImageLayout(VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	//}
 
 	glm::mat4 Node::getLocalMatrix()
 	{

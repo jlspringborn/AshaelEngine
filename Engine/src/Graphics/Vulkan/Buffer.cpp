@@ -4,6 +4,7 @@
 #include "Vulkan/Buffer.h"
 
 #include <stdexcept>
+#include <memory>
 
 namespace ash
 {
@@ -55,5 +56,37 @@ namespace ash
 		vkCmdCopyBuffer(commandBuffer, *srcBuffer, m_buffer, 1, &copyRegion);
 		
 		m_logicalDevice->endSingleTimeCommand(commandBuffer);
+	}
+
+	std::unique_ptr<Buffer> Buffer::createDeviceLocalBuffer(
+		const LogicalDevice* logicalDevice, 
+		const PhysicalDevice* physicalDevice, 
+		VkDeviceSize bufferSize, 
+		const void* inData, 
+		VkBufferUsageFlagBits usage)
+	{
+		// Store inverse bind matrices for this skin in a shader storage buffer object
+		std::unique_ptr<Buffer> stagingBuffer{ std::make_unique<Buffer>(
+		logicalDevice,
+		physicalDevice,
+		bufferSize,
+		VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
+
+		void* data;
+		vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);
+		memcpy(data, inData, (size_t)bufferSize);
+		vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
+
+		std::unique_ptr<Buffer> localBuffer = std::make_unique<Buffer>(
+			logicalDevice,
+			physicalDevice,
+			bufferSize,
+			VK_BUFFER_USAGE_TRANSFER_DST_BIT | usage,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+
+		localBuffer->copyBuffer(stagingBuffer.get(), bufferSize);
+
+		return std::move(localBuffer);
 	}
 }

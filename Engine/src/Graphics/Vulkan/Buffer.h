@@ -10,6 +10,8 @@
 
 #include <vulkan/vulkan.h>
 
+#include <memory>
+
 namespace ash
 {
 	/**
@@ -35,6 +37,18 @@ namespace ash
 		 * @param size of the source buffer
 		 */
 		void copyBuffer(const Buffer* srcBuffer, VkDeviceSize size);
+
+		/**
+		 * Creates a buffer in device local memory for high speed access
+		 * inData is passed as a void* in order to handle all possible data types
+		 */
+		static std::unique_ptr<Buffer> createDeviceLocalBuffer(
+			const LogicalDevice* logicalDevice,
+			const PhysicalDevice* phyiscalDevice,
+			VkDeviceSize bufferSize,
+			const void* inData,
+			VkBufferUsageFlagBits usage
+			);
 
 	private:
 
