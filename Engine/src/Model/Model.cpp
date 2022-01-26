@@ -178,14 +178,17 @@ namespace ash
 		{
 			// update the joint matrices
 			glm::mat4 inverseTransform{ glm::inverse(getNodeMatrix(node)) };
-		//	Skin skin = m_skins[node->skin];
-		//	size_t numJoints{ (uint32_t)skin.joints.size() };
-		//	std::vector<glm::mat4> jointMatrices(numJoints);
-		//	for (size_t i = 0; i < numJoints; i++)
-		//	{
-		//		jointMatrices[i] = getNodeMatrix(skin.joints[i]) * skin.inverseBindMatrices[i];
-		//		jointMatrices[i] = inverseTransform * jointMatrices[i];
-		//	}
+			Skin& skin = m_skins[node->skin];
+			size_t numJoints{ (uint32_t)skin.joints.size() };
+			std::vector<glm::mat4> jointMatrices(numJoints);
+			for (size_t i = 0; i < numJoints; i++)
+			{
+				jointMatrices[i] = getNodeMatrix(skin.joints[i]) * skin.inverseBindMatrices[i];
+				jointMatrices[i] = inverseTransform * jointMatrices[i];
+			}
+
+			// update ssbo
+			// TODO: create copy function for buffer data
 		}
 	}
 
