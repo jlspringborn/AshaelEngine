@@ -74,10 +74,7 @@ namespace ash
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT) };
 
 		// directly copy the data into device coherent memory
-		void* data;
-		vkMapMemory(*logicalDevice, stagingBuffer->getBufferMemory(), 0, bufferSize, 0, &data);	// 
-		memcpy(data, inData, (size_t)bufferSize);
-		vkUnmapMemory(*logicalDevice, stagingBuffer->getBufferMemory());
+		stagingBuffer->copyTo(inData, bufferSize);
 
 		// create the buffer that will you device local memory
 		std::unique_ptr<Buffer> localBuffer = std::make_unique<Buffer>(
@@ -92,5 +89,13 @@ namespace ash
 
 		// return the smart ptr for the local buffer
 		return std::move(localBuffer);
+	}
+
+	void Buffer::copyTo(const void* inData, size_t size)
+	{
+		void* data;
+		vkMapMemory(*m_logicalDevice, m_bufferMemory, 0, size, 0, &data);	// 
+		memcpy(data, inData, size);
+		vkUnmapMemory(*m_logicalDevice, m_bufferMemory);
 	}
 }

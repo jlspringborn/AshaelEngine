@@ -179,6 +179,8 @@ namespace ash
 
 		void updateJoints(Node* node);
 
+		void updateAnimation(float deltaTime);
+
 	private:
 
 		/**
@@ -223,6 +225,8 @@ namespace ash
 		std::vector<Skin> m_skins;
 
 		std::vector<Animation> m_animations;
+
+		uint32_t m_activeAnimation{ 0 };
 
 	};
 }

@@ -50,6 +50,12 @@ namespace ash
 			VkBufferUsageFlagBits usage
 			);
 
+		/**
+		 * Copies data into the buffer by mapping a void* to the buffer
+		 * memory, copying data to the void*, and then unmapping the memory
+		 */
+		void copyTo(const void* inData, size_t size);
+
 	private:
 
 		/**

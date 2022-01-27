@@ -188,7 +188,20 @@ namespace ash
 			}
 
 			// update ssbo
-			// TODO: create copy function for buffer data
+			skin.ssbo->copyTo(jointMatrices.data(), jointMatrices.size() * sizeof(glm::mat4));
+		}
+		
+		for (auto& child : node->children)
+		{
+			updateJoints(child);
+		}
+	}
+
+	void Model::updateAnimation(float deltaTime)
+	{
+		if (m_activeAnimation > static_cast<uint32_t>(m_animations.size()) - 1)
+		{
+			std::cout << "No animation with index " << m_activeAnimation << '\n';
 		}
 	}
 
