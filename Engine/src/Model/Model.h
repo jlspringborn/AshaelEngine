@@ -175,10 +175,20 @@ namespace ash
 
 		void createDescriptorSets(VkDescriptorPool pool, VkDescriptorSetLayout layout, VkSampler sampler);
 
+		/**
+		 * returns the transform matrix of the provided node
+		 * after parents transforms have been applied
+		 */
 		glm::mat4 getNodeMatrix(Node* node);
 
+		/**
+		 * updates joints for given node
+		 */
 		void updateJoints(Node* node);
 
+		/**
+		 * updates animation based on time passed since last frame
+		 */
 		void updateAnimation(float deltaTime);
 
 	private:
@@ -213,20 +223,39 @@ namespace ash
 		 */
 		std::unique_ptr<Image> m_texture{};
 
-
+		/**
+		 * array of nodes representing a glTF scene tree
+		 */
 		std::vector<Node*> nodes;
 
+		/**
+		 * array of Vulkan images 
+		 */
 		std::vector<TextureImage> m_textureImages;
 
+		/**
+		 * array of texture information: base color, index
+		 */
 		std::vector<Material> m_materials;
 
+		/**
+		 * array of image indices to texture images
+		 */
 		std::vector<Texture> m_textures;
 
+		/**
+		 * array of glTF skins
+		 */
 		std::vector<Skin> m_skins;
 
+		/**
+		 * array of glTF animations
+		 */
 		std::vector<Animation> m_animations;
 
+		/**
+		 * index of the currently active animation
+		 */
 		uint32_t m_activeAnimation{ 0 };
-
 	};
 }
